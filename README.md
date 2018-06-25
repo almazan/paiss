@@ -5,7 +5,7 @@ NLE practical session for PAISS 2018
 
 ### Linux / MacOS
 
-First, download and install appropriate version of miniconda using instructions the instructions for [MacOS](https://conda.io/docs/user-guide/install/macos.html) or [Linux](https://conda.io/docs/user-guide/install/linux.html).
+First, download and install the appropriate version of miniconda following the instructions for [MacOS](https://conda.io/docs/user-guide/install/macos.html) or [Linux](https://conda.io/docs/user-guide/install/linux.html).
 
 Then run the following commands:
 
@@ -18,7 +18,7 @@ On MacOS there’s a bug for faiss related to libomp (https://github.com/faceboo
 
 ### Windows
 
-Install anaconda on windows (launch .exe file downloaded from the [conda website](https://conda.io/docs/user-guide/install/windows.html)). Has to be python 3 (pytorch doesn’t support 2.7 on windows)
+Install anaconda on windows (launch .exe file downloaded from the [conda website](https://conda.io/docs/user-guide/install/windows.html)). It has to be python 3 (pytorch doesn’t support 2.7 on windows)
 
 In the anaconda prompt, run:
 
@@ -35,9 +35,9 @@ conda install pillow
 Oxford dataset:
 ```
 wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz -O images.tgz
-mkdir data/oxford5k/jpg && tar -xzf images.tgz -C data/oxford5k/jpg
+mkdir -p data/oxford5k/jpg && tar -xzf images.tgz -C data/oxford5k/jpg
 wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz -O gt_files.tgz
-mkdir data/oxford5k/lab && tar -xzf gt_files.tgz -C data/oxford5k/lab
+mkdir -p data/oxford5k/lab && tar -xzf gt_files.tgz -C data/oxford5k/lab
 ```
 
 
