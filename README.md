@@ -43,7 +43,7 @@ mkdir -p data/oxford5k/lab && tar -xzf gt_files.tgz -C data/oxford5k/lab
 
 Features and models:
 ```
-wget wget https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1 -O features.tgz
+wget https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1 -O features.tgz
 tar -xzf features.tgz -C data
 wget https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1 -O models.tgz
 tar -xzf models.tgz -C data
