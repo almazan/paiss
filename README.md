@@ -43,17 +43,15 @@ mkdir -p data/oxford5k/lab && tar -xzf gt_files.tgz -C data/oxford5k/lab
 
 Features and models:
 ```
-wget ...
+wget wget https://www.dropbox.com/s/v2d00spl0xh5mpn/features.tgz?dl=1 -O features.tgz
 tar -xzf features.tgz -C data
-wget ...
+wget https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1 -O models.tgz
 tar -xzf models.tgz -C data
 ```
 
 
 ## Demo
 
-Run `python demo.py --qidx 0 --topk 10` and you should see the following ouput:
+Run `python demo.py --qidx 42 --topk 5` and you should see the following ouput:
 
-
-
-
+![Output](https://www.dropbox.com/s/pgboc4yrehvdsh7/out.png?raw=1)
