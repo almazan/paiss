@@ -9,7 +9,7 @@ import subprocess
 import functools
 import getpass
 import matplotlib.pyplot as plt
-#import faiss
+import faiss
 
 from .dataset import Dataset
 
@@ -27,7 +27,7 @@ class Oxford(Dataset):
     @property
     def nclass(self):
         return len(self.__cls_names)
-        
+
     @property
     def N_images(self):
         return self.__N_images
@@ -37,7 +37,7 @@ class Oxford(Dataset):
 
     def get_label(self, i):
         return self.__lab[i]
-        
+
     def get_query(self, i):
         return self.__q_index[i]
 
@@ -45,7 +45,7 @@ class Oxford(Dataset):
         return self.__q_index
     def get_label_vector(self):
         return self.__lab
-        
+
     def get_label_names(self):
         return self.__cls_names
 
@@ -68,9 +68,9 @@ class Oxford(Dataset):
         return self.__q_roi[self.__q_names[i]]
 
     def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False):
+        q_name = self.__q_names[q_idx]
         q_idx = self.__q_index[q_idx]
-        if q_feat==None: q_feat = feats[q_idx]
-
+        if q_feat is None: q_feat = feats[q_idx]
         if pq_flag:
             # perform AQE?
             if nqe > 0:
@@ -99,15 +99,18 @@ class Oxford(Dataset):
         nplots = 1 + topk
         bsize  = 20
         qlab   = self.__lab[q_idx]
+        plt.ion()
         fig, axes = plt.subplots(1, nplots, figsize=(20, 3))
         axes[0].imshow(self.draw_border(np.array(self.get_image(q_idx)),bsize,[1,1,1]))
         axes[0].set_axis_off()
         axes[0].set_title('query')
         for i in range(1,nplots):
-            if self.__lab[idx[i - 1]] == qlab:
+            if idx[i-1] in self.__relevants[q_name]:
                 bcol = [0,1,0]
-            else:
+            elif idx[i-1] in self.__non_relevants[q_name]:
                 bcol = [1,0,0]
+            else:
+                bcol = [0.5, 0.5, 0.5]
             axes[i].imshow(self.draw_border(np.array(self.get_image(idx[i - 1])),bsize,bcol))
             axes[i].set_axis_off()
             axes[i].set_title("")
@@ -116,7 +119,7 @@ class Oxford(Dataset):
 
         # save/show fig:
         plt.show()
-        # plt.savefig('out.png')
+        input("Press Enter to continue...")
         plt.close()
 
     def vis_queries(self):
@@ -151,7 +154,7 @@ class Oxford(Dataset):
             axes[1].imshow(self.draw_border(np.array(self.get_image( np.nonzero(self.__lab == q_label[i])[0][p_idxs[i]] )),30,[0,1,0]))
             axes[1].set_title('positive ex')
             axes[1].set_axis_off()
-            
+
             axes[2].imshow(self.draw_border(np.array(self.get_image( np.nonzero(self.__lab != q_label[i])[0][n_idxs[i]] )),30,[1,0,0]))
             axes[2].set_title('negative ex')
             axes[2].set_axis_off()
@@ -175,13 +178,13 @@ class Oxford(Dataset):
 
     def pq_train(self, x, m, n_bits):
         d  = x.shape[1]
-        
+
         # Create the index
         self.pq = faiss.IndexPQ(d, m, n_bits)
-       
+
         # Training
         self.pq.train(x)
-                        
+
     def score(self, sim, args):
         idx = np.argsort(sim, axis=1)[:, ::-1]
         if not os.path.exists(args.score):
@@ -219,7 +222,7 @@ class Oxford(Dataset):
 
     def __load(self):
         # Check localtion and deploy if needed:
-        root = self.__find_location_or_deploy()
+        root = self.__check_location()
         self.root = root
         # Prepare image list and labels
         self.__dataset_extension = "jpg"
@@ -259,7 +262,7 @@ class Oxford(Dataset):
         self.__q_index = np.array([self.__img_filenames.index(self.__name_to_filename[qn]) for qn in self.__q_names])
         self.__N_images = len(self.__img_filenames)
         self.__N_queries = len(self.__q_index)
-        
+
         self.__find_labels()
 
     def __find_labels(self):
@@ -268,11 +271,11 @@ class Oxford(Dataset):
         for cls_idx, cls in enumerate(self.__cls_names):
             self.__lab[self.__relevants[cls+'_1']] = cls_idx+1
 
-    def __find_location_or_deploy(self):
+    def __check_location(self):
         root_ram = "."
-        path = osp.join(root_ram, 'datasets/oxford5k')
+        path = osp.join(root_ram, 'data/oxford5k')
         if not os.path.exists(path):
-            raise NotImplementedError("Check your /datasets/oxford5k folder. It isn't there?'")
+            raise NotImplementedError("Check your 'data/oxford5k' folder. If it is empty, follow the instructions in the README to download the dataset.")
         return path
 
     def draw_border(self,img,bsize,bcol):
