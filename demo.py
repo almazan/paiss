@@ -23,12 +23,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # load the Oxford5k database
 dataset = create('Oxford')
-print(dataset)
+print (dataset)
 
 # initialize architecture and load weights
+print ('Loading the model...')
 model = resnet50_rank_DA().to(device)
 model.eval()
-print(model)
+print ('Done\n')
 
 # load the precomputed dataset features
 d_feats = np.load('data/features/resnet50-rnk-lm-da_ox.npy')
@@ -44,7 +45,9 @@ I = trf.normalize(I, dict(rgb_means=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.
 I = I.unsqueeze(0).to(device)
 # Forward pass to extract the features
 with torch.no_grad():
+    print ('Extracting the representation of the query...')
     q_feat = model(I).numpy()
+print ('Done\n')
 
 # Rank the database and visualize the top-k most similar images in the database
 dataset.vis_top(d_feats, args.qidx, q_feat=q_feat, topk=args.topk)
