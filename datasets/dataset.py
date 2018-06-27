@@ -41,9 +41,12 @@ class Dataset(object):
     def get_filename(self, i):
         return os.path.join(self.root, self.get_key(i))
 
-    def get_image(self, i):
+    def get_image(self, i, roi=None):
         from PIL import Image
-        return Image.open(self.get_filename(i)).convert('RGB')
+        img = Image.open(self.get_filename(i)).convert('RGB')
+        if roi is not None:
+            img = img.crop(tuple(roi))
+        return img
 
     def get_label(self, i, toint=False):
         raise NotImplementedError()

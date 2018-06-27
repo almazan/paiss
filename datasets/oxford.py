@@ -43,6 +43,7 @@ class Oxford(Dataset):
 
     def get_query_list(self):
         return self.__q_index
+    
     def get_label_vector(self):
         return self.__lab
 
@@ -93,7 +94,7 @@ class Oxford(Dataset):
                 sim   = np.dot(q_aug, feats.T)
             idx = np.argsort(sim)[::-1]
 
-        idx = [i for i in idx.squeeze() if i not in set(self.__q_index)]
+        #idx = [i for i in idx.squeeze() if i not in set(self.__q_index)]
 
         # visualize:
         nplots = 1 + topk
@@ -101,7 +102,7 @@ class Oxford(Dataset):
         qlab   = self.__lab[q_idx]
         plt.ion()
         fig, axes = plt.subplots(1, nplots, figsize=(20, 3))
-        axes[0].imshow(self.draw_border(np.array(self.get_image(q_idx)),bsize,[1,1,1]))
+        axes[0].imshow(self.draw_border(np.array(self.get_image(q_idx, self.__q_roi[q_name])),bsize,[1,1,1]))
         axes[0].set_axis_off()
         axes[0].set_title('query')
         for i in range(1,nplots):
