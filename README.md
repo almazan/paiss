@@ -10,7 +10,7 @@ First, download and install the appropriate version of miniconda following the i
 Then run the following commands:
 
 ```
-conda install numpy matplotlib ipython
+conda install numpy matplotlib ipython scikit-learn
 conda install pytorch torchvision faiss-cpu -c pytorch
 ```
 
