@@ -11,6 +11,8 @@ from archs import *
 from tsne import do_tsne
 from PIL import Image
 import transforms as trf
+import sys
+import os.path as osp
 
 import argparse
 parser = argparse.ArgumentParser(description='Demo')
@@ -32,7 +34,12 @@ model.eval()
 print ('Done\n')
 
 # load the precomputed dataset features
-d_feats = np.load('data/features/resnet50-rnk-lm-da_ox.npy')
+d_feats_file = 'data/features/resnet50-rnk-lm-da_ox.npy'
+try:
+    d_feats = np.load(d_feats_file)
+except OSError as e:
+    print ('ERROR: File {} not found. Please follow the instructions to download the pre-computed features.'.format(d_feats_file))
+    sys.exit()
 
 # Load the query image
 img = Image.open(dataset.get_query_filename(args.qidx))
@@ -50,4 +57,4 @@ with torch.no_grad():
 print ('Done\n')
 
 # Rank the database and visualize the top-k most similar images in the database
-dataset.vis_top(d_feats, args.qidx, q_feat=q_feat, topk=args.topk)
+dataset.vis_top(d_feats, args.qidx, q_feat=q_feat, topk=args.topk, out_image_file='out.png')

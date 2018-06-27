@@ -68,7 +68,7 @@ class Oxford(Dataset):
     def get_query_roi(self, i):
         return self.__q_roi[self.__q_names[i]]
 
-    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False):
+    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, out_image_file=None):
         q_name = self.__q_names[q_idx]
         q_idx = self.__q_index[q_idx]
         if q_feat is None: q_feat = feats[q_idx]
@@ -121,6 +121,8 @@ class Oxford(Dataset):
         # save/show fig:
         plt.show()
         input("Press Enter to continue...")
+        if out_image_file is not None:
+            plt.savefig(out_image_file)
         plt.close()
 
     def vis_queries(self):

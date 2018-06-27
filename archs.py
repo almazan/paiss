@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torchvision import models
 from modules import GeneralizedMeanPooling
 import os.path as osp
+import sys
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -180,10 +181,14 @@ def resnet101_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
     """
     model = ResNet_RMAC(Bottleneck, [3, 4, 23, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
-        if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)['state_dict']
-        else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        try:
+            if torch.cuda.device_count()>0:
+                weight_dict = torch.load(weights)['state_dict']
+            else:
+                weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        except OSError as e:
+            print ('ERROR: Weights {} not found. Please follow the instructions to download models.'.format(weights))
+            sys.exit()
         model.load_state_dict(weight_dict)
     return model
 
@@ -192,10 +197,14 @@ def resnet50_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
     """
     model = ResNet_RMAC(Bottleneck, [3, 4, 6, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
-        if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)['state_dict']
-        else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        try:
+            if torch.cuda.device_count()>0:
+                weight_dict = torch.load(weights)['state_dict']
+            else:
+                weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        except OSError as e:
+            print ('ERROR: Weights {} not found. Please follow the instructions to download models.'.format(weights))
+            sys.exit()
         model.load_state_dict(weight_dict)
     return model
 
@@ -204,10 +213,14 @@ def resnet18_rmac(out_dim=512, dropout_p=None, weights=None, **kwargs):
     """
     model = ResNet_RMAC(BasicBlock, [2, 2, 2, 2], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
-        if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)['state_dict']
-        else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        try:
+            if torch.cuda.device_count()>0:
+                weight_dict = torch.load(weights)['state_dict']
+            else:
+                weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        except OSError as e:
+            print ('ERROR: Weights {} not found. Please follow the instructions to download models.'.format(weights))
+            sys.exit()
         model.load_state_dict(weight_dict)
     return model
 
@@ -216,10 +229,14 @@ def resnet152_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
     """
     model = ResNet_RMAC(Bottleneck, [3, 8, 36, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
-        if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)['state_dict']
-        else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        try:
+            if torch.cuda.device_count()>0:
+                weight_dict = torch.load(weights)['state_dict']
+            else:
+                weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
+        except OSError as e:
+            print ('Weights {} not found. Please follow the instructions to download models.'.format(weights))
+            sys.exit()
         model.load_state_dict(weight_dict)
     return model
 
