@@ -1,5 +1,5 @@
 # PAISS18
-NLE practical session for PAISS 2018
+NLE practical session for [PAISS 2018](https://project.inria.fr/paiss/)
 
 ## Installation
 
@@ -30,7 +30,7 @@ pip install torchvision --no-deps
 conda install pillow
 ```
 
-### Donwload the necessary files
+### Donwload the dataset and models
 
 Oxford dataset:
 ```
@@ -52,7 +52,7 @@ tar -xzf models.tgz -C data
 
 ## Demo
 
-Run `python demo.py` and you should see the following ouput:
+Run `python demo.py --qidx 0 --topk 10` and you should see the following ouput:
 
 
 
