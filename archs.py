@@ -6,6 +6,7 @@ from torch import nn
 import torch.nn.functional as F
 from torchvision import models
 from modules import GeneralizedMeanPooling
+import os.path as osp
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -170,7 +171,7 @@ class ResNet_RMAC(nn.Module):
 
         return x
 
-def l2_normalize(x, axis=1):# TODO: verify if axis=1 is the good default value. before: axis=None
+def l2_normalize(x, axis=-1):
     x = F.normalize(x, p=2, dim=axis)
     return x
 
@@ -180,9 +181,9 @@ def resnet101_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
     model = ResNet_RMAC(Bottleneck, [3, 4, 23, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
         if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)
+            weight_dict = torch.load(weights)['state_dict']
         else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})
+            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
         model.load_state_dict(weight_dict)
     return model
 
@@ -192,21 +193,21 @@ def resnet50_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
     model = ResNet_RMAC(Bottleneck, [3, 4, 6, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
         if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)
+            weight_dict = torch.load(weights)['state_dict']
         else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})
+            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
         model.load_state_dict(weight_dict)
     return model
 
-def resnet18_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
+def resnet18_rmac(out_dim=512, dropout_p=None, weights=None, **kwargs):
     """Constructs a ResNet-50 model.
     """
     model = ResNet_RMAC(BasicBlock, [2, 2, 2, 2], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
         if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)
+            weight_dict = torch.load(weights)['state_dict']
         else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})
+            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
         model.load_state_dict(weight_dict)
     return model
 
@@ -216,19 +217,12 @@ def resnet152_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
     model = ResNet_RMAC(Bottleneck, [3, 8, 36, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
     if weights:
         if torch.cuda.device_count()>0:
-            weight_dict = torch.load(weights)
+            weight_dict = torch.load(weights)['state_dict']
         else:
-            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})
+            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
         model.load_state_dict(weight_dict)
     return model
 
-# models to be called
-resnet18 =  lambda : resnet18_rmac(out_dim=1000, pooling=None, weights='./models/imagenet_alexnet-classif-fc.pth')
-resnet18_GeM_imagenet = lambda : resnet18_rmac(out_dim=1000, weights='./models/imagenet_resnet18-classif-fc.pth')
-resnet18_GeM = lambda : resnet18_rmac(out_dim=586, weights='./models/clean_lm_resnet18-cls.pt')
-resnet18_GeM_rank = lambda : resnet18_rmac(out_dim=512, weights='./models/clean_lm_resnet18-rnk-gem.pt')
-resnet18_GeM_rank_DA = lambda : resnet18_rmac(out_dim=512, weights='./models/clean_lm_resnet18-rnk-gem_crop-tilt-rot-pjit.pt')
-resnet50_GeM_rank_DA = lambda : resnet50_rmac(out_dim=512, weights='./models/clean_lm_resnet50-rnk-gem_crop-tilt-rot-pjit.pt')
 
 class AlexNet(nn.Module):
 
@@ -291,11 +285,11 @@ def alexnet_fc(out_dim=1000, train=True, weights=None, **kwargs):
         model.load_state_dict(weight_dict)
     return model
 
-alexnet_imagenet = lambda: alexnet_fc(out_dim=1000, train=True, weights='./models/imagenet_alexnet-classif-fc.pt')
 
-alexnet_imagenet_test = lambda: alexnet_fc(out_dim=4096, train=False, weights='./models/imagenet_alexnet-classif-fc.pt')
+# models to be called
+path_models = 'data/models'
 
-alexnet_lm = lambda: alexnet_fc(out_dim=586, train=True, weights='models/clean_lm_resnet18-cls.pt')
-
-alexnet_lm_test = lambda: alexnet_fc(out_dim=4096, train=False, weights='models/clean_lm_resnet18-cls.pt')
-
+resnet50_cls = lambda : resnet50_rmac(out_dim=586, weights=osp.join(path_models, 'resnet50-cls-lm.pt'))
+resnet18_rank_DA = lambda : resnet18_rmac(out_dim=512, weights=osp.join(path_models, 'resnet18-rnk-lm-da.pt'))
+resnet50_rank = lambda : resnet50_rmac(out_dim=2048, weights=osp.join(path_models, 'resnet50-rnk-lm.pt'))
+resnet50_rank_DA = lambda : resnet50_rmac(out_dim=2048, weights=osp.join(path_models, 'resnet50-rnk-lm-da.pt'))
