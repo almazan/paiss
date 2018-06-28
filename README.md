@@ -38,7 +38,7 @@ _Note:_ All paths in this section are relative to the root directory of this rep
 
 **Oxford dataset**
 
-Linux/MacOS:
+On Linux/MacOS, execute the following:
 ```
 wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz -O images.tgz
 mkdir -p data/oxford5k/jpg && tar -xzf images.tgz -C data/oxford5k/jpg
@@ -46,7 +46,7 @@ wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz -O gt_files.t
 mkdir -p data/oxford5k/lab && tar -xzf gt_files.tgz -C data/oxford5k/lab
 ```
 
-Windows:
+On Windows, perform the following:
 - Download www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz
 - create directory data/oxford5k/jpg/
 - uncompress oxbuild_images.tgz and store in data/oxford5k/jpg/
@@ -56,14 +56,14 @@ Windows:
 
 **Features and models**
 
-Linux/MacOS:
+On Linux/MacOS, execute the following:
 ```
 wget https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1 -O features.tgz
 tar -xzf features.tgz -C data
 wget https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1 -O models.tgz
 tar -xzf models.tgz -C data
 ```
-Windows:
+On Windows, perform the following:
 - Download https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1
 - Uncompress features.tgz and store in data/
 - Download https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1
