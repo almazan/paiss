@@ -32,9 +32,11 @@ conda install pillow
 
 **NOTE: _The FAISS package is not supported on Windows._ Participants with Windows machines must follow the product quantization exercise with their neighbours.**
 
-### Donwload the dataset and models
+### Download the dataset and models
 
-Oxford dataset:
+**Note:** All paths in this section are relative to the root directory of this repository.
+
+Oxford dataset (Linux/MacOS):
 ```
 wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz -O images.tgz
 mkdir -p data/oxford5k/jpg && tar -xzf images.tgz -C data/oxford5k/jpg
@@ -42,14 +44,26 @@ wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz -O gt_files.t
 mkdir -p data/oxford5k/lab && tar -xzf gt_files.tgz -C data/oxford5k/lab
 ```
 
+Oxford dataset (Windows):
+- Download www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz
+- create directory data/oxford5k/jpg/
+- uncompress oxbuild_images.tgz and store in data/oxford5k/jpg/
+- Download www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz
+- create directory data/oxford5k/lab/
+- uncompress gt_files_170407.tgz and store in data/oxford5k/lab/
 
-Features and models:
+Features and models (Linux/MacOS):
 ```
 wget https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1 -O features.tgz
 tar -xzf features.tgz -C data
 wget https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1 -O models.tgz
 tar -xzf models.tgz -C data
 ```
+Features and models (Windows):
+- Download https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1
+- Uncompress features.tgz and store in data/
+- Download https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1
+- Uncompress models.tgz and store in data/
 
 
 ## Demo
