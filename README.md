@@ -40,7 +40,7 @@ conda install pillow
 First, clone this repository:
 
 ```
-cd ~/my_projects
+cd $HOME/my_projects
 git clone https://github.com/almazan/paiss.git
 ```
 
@@ -60,6 +60,7 @@ _Note:_ All paths in this section are relative to the root directory of this rep
 On Linux/MacOS, execute the following:
 
 ```
+cd $HOME/my_projects/paiss
 wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz -O images.tgz
 mkdir -p data/oxford5k/jpg && tar -xzf images.tgz -C data/oxford5k/jpg
 wget www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz -O gt_files.tgz
@@ -80,6 +81,7 @@ On Windows, perform the following:
 On Linux/MacOS, execute the following:
 
 ```
+cd $HOME/my_projects/paiss
 wget https://www.dropbox.com/s/gr404xlfr4021pw/features.tgz?dl=1 -O features.tgz
 tar -xzf features.tgz -C data
 wget https://www.dropbox.com/s/mr4risqu7t9neel/models.tgz?dl=1 -O models.tgz
@@ -100,7 +102,7 @@ Execute:
 
 ```
 source $HOME/miniconda3/bin/activate
-cd ~/my_projects
+cd $HOME/my_projects/paiss
 python demo.py --qidx 42 --topk 5 
 ```
 
