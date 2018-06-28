@@ -8,15 +8,15 @@
 import numpy as np
 from datasets import create
 from archs import *
-from tsne import do_tsne
+from utils.tsne import do_tsne
 from PIL import Image
-import transforms as trf
+import utils.transforms as trf
 import sys
 import os.path as osp
 
 import argparse
 parser = argparse.ArgumentParser(description='Demo')
-    
+
 parser.add_argument('--qidx', type=int, default=0, required=False, help='Query index')
 parser.add_argument('--topk', type=int, default=5, required=False, help='Showing top-k results')
 args = parser.parse_args()
