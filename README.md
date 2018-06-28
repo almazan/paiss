@@ -72,7 +72,7 @@ On Windows, perform the following:
 - Download www.robots.ox.ac.uk/~vgg/data/oxbuildings/oxbuild_images.tgz
 - create directory `data/oxford5k/jpg/`
 - uncompress oxbuild_images.tgz and store in `data/oxford5k/jpg/`
-- Download www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt\_files\_170407.tgz
+- Download www.robots.ox.ac.uk/~vgg/data/oxbuildings/gt_files_170407.tgz
 - create directory `data/oxford5k/lab/`
 - uncompress gt\_files\_170407.tgz and store in `data/oxford5k/lab/`
 
