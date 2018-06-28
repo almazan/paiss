@@ -39,6 +39,7 @@ You will need to download 4 files:
 - gt_files_170407.tgz (280KB)
 - features.tgz (579MB)
 - models.tgz (328MB)
+
 and store them in the appropriate paths.
 
 _Note:_ All paths in this section are relative to the root directory of this repository.
