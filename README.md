@@ -30,9 +30,7 @@ pip install torchvision --no-deps
 conda install pillow
 ```
 
-**_
-NOTE: The FAISS package is not supported on Windows. Participants with Windows machines must follow the product quantization exercise with their neighbours.
-_**
+**NOTE: _The FAISS package is not supported on Windows._ Participants with Windows machines must follow the product quantization exercise with their neighbours.**
 
 ### Donwload the dataset and models
 
