@@ -55,7 +55,7 @@ and store them in the appropriate paths.
 
 _Note:_ All paths in this section are relative to the root directory of this repository.
 
-###Oxford dataset
+**Oxford dataset**
 
 On Linux/MacOS, execute the following:
 
@@ -76,7 +76,7 @@ On Windows, perform the following:
 - create directory `data/oxford5k/lab/`
 - uncompress gt\_files\_170407.tgz and store in `data/oxford5k/lab/`
 
-###Features and models
+**Features and models**
 
 On Linux/MacOS, execute the following:
 
