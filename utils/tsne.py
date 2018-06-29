@@ -12,8 +12,7 @@ np.random.seed(0)
 def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
     # hyperparameters:
     n_pca  = 100
-    n_sne  = 1000
-    n_cls = 12
+    n_cls  = 12
     n_dim  = 2
     n_iter = 300
 
@@ -21,18 +20,16 @@ def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
     labs  = [int(i) for i in labs]
     slabs = list(set(labs))
 
-    # sample classes:
+    # map class ids to names:
     if not isinstance(cls, np.ndarray): cls = np.array(cls)
     cls     = np.array( ['unlabeled']+cls.tolist() )
-    cls_ind = list(range(feats.shape[0]))
-    featsc  = feats[cls_ind,:]
+    cls_ind = range(feats.shape[0])
     labsc   = np.array([cls[labs[i]] for i in cls_ind])
 
     #reduce dimensionality:
     print('applying PCA...')
-    pca   = PCA(n_components=n_pca)
-    feats = pca.fit_transform(featsc)
-    n_smp = feats.shape[0]
+    pca    = PCA(n_components=n_pca)
+    featsc = pca.fit_transform(feats)
 
     print('applying t-SNE...')
     time_start = time.time()
@@ -54,14 +51,13 @@ def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
         embed_y   = feats_tsne[embed_idx,1]
         ax.scatter(embed_x, embed_y, c=colorVal, label=cls[c])
 
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1)
     plt.axis('off')
-    figname = 'scatter_niter{:03d}_'.format(n_iter)+sec
-    if show_unlabeled: figname += 'showunlabeled' 
-    figname += '.png'
-    plt.show(block=False)
-    plt.savefig(figname, bbox_inches='tight')
-    plt.close(fig)
+    plt.axis('equal')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    fig.tight_layout()
+    plt.show()
+    input('2-dimensional t-sne plot. Press enter to continue' % cls)
+    plt.close()
 
 if __name__ == "__main__":
     import argparse
