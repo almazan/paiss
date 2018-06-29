@@ -79,11 +79,12 @@ do_tsne(feats, labels, classes, sec='1b')
 model_1c = alexnet_GeM()
 print(model_1c)
 # Q: For this model, we remove all fully connected layers (classifier layers) and replace the last max pooling layer by an aggregation pooling layer (more details about this layer in the next subsection)
-dataset.vis_top(feats, q_idx)
 
 feats = np.load('data/features/alexnet-cls-lm_ox.npy')
 print(feats.shape)
 # Q: Why does the size of the feature representation changes? Why does the size of the feature representation is important for a image retrieval task?
+dataset.vis_top(feats, q_idx)
+
 do_tsne(feats, labels, classes, sec='1c')
 # Q: How does the aggregation layer changes the t-SNE visualization? Can we see some structure in the clusters of similarly labeled images?
 del model_1a, model_1b, model_1c
