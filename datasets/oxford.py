@@ -96,6 +96,9 @@ class Oxford(Dataset):
                 sim   = np.dot(q_aug, feats.T)
             idx = np.argsort(sim)[::-1]
 
+        ap = self.get_ap(q_name, idx)
+        print('AP={:.2f}'.format(ap * 100.))
+
         # visualize:
         nplots = 1 + topk
         bsize  = 20
@@ -187,6 +190,23 @@ class Oxford(Dataset):
 
         # Training
         self.pq.train(x)
+
+    def get_ap(self, q_name, sorted_idx):
+        rel   = self.__relevants[q_name]
+        junk  = self.__junk[q_name]
+
+        # construct ground-truth and scores:
+        y_scores = np.zeros(self.N_images)
+        y_true   = np.zeros(self.N_images)
+        for e,i in enumerate(sorted_idx): y_scores[i] = self.N_images - e
+        for i in rel: y_true[i] = 1
+
+        # remove junk:
+        y_scores = np.delete(y_scores, junk)
+        y_true   = np.delete(y_true, junk)
+        
+        # compute ap:
+        return average_precision_score(y_true, y_scores)
 
     def __load(self):
         # Check localtion and deploy if needed:
