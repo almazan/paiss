@@ -2,7 +2,6 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import time
 import matplotlib
-#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as colors
@@ -25,7 +24,7 @@ def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
     # sample classes:
     if not isinstance(cls, np.ndarray): cls = np.array(cls)
     cls     = np.array( ['unlabeled']+cls.tolist() )
-    cls_ind = list(range(feats.shape[0]))#np.array([e for e,i in enumerate(labs) if i in set(cls)])
+    cls_ind = list(range(feats.shape[0]))
     featsc  = feats[cls_ind,:]
     labsc   = np.array([cls[labs[i]] for i in cls_ind])
 
@@ -55,7 +54,7 @@ def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
         embed_y   = feats_tsne[embed_idx,1]
         ax.scatter(embed_x, embed_y, c=colorVal, label=cls[c])
 
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=2)
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1)
     plt.axis('off')
     figname = 'scatter_niter{:03d}_'.format(n_iter)+sec
     if show_unlabeled: figname += 'showunlabeled' 
@@ -76,8 +75,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     train_db = 'landmark' if args.finetuned else 'imagenet'
     data_f = 'data/'+args.dataset+'_res_224_'+args.backbone+'_'+train_db+'_'+args.trained+'.npz'
-#    data_f = 'data/lm18_val_feats_labels.npz'
-#    data_f = 'data/oxford_res_224_alexnet_imagenet_classification.npz'
     data   = np.load(data_f)
     feats  = data['feats']
     labs   = data['labs']
