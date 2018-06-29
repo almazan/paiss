@@ -13,7 +13,7 @@ from torch import nn
 
 from datasets import create
 from archs import *
-from utils.test import q_eval
+#from utils.test import q_eval TODO: uncomment this when test.py is commited
 from utils.tsne import do_tsne
 
 np.random.seed(0)
@@ -47,16 +47,16 @@ model_1a = alexnet_imagenet()
 print(model_1a)
 # Q: The original AlexNet model is trained for classification on ImageNet dataset, that contains 1000 image classes. What is the number of dimensions of the output of the model? What does each dimension represents?
 
-# visualize top results for a given query
-q_idx = 0 # TODO: find good query candidates
-dataset.vis_top(feats, q_idx)
-
 feats = np.load('data/features/alexnet-cls-imagenet-fc7_ox.npy')
 print(norm(feats[:10], axis=1))
 print(feats.shape)
 # Q: What does each line of the matrix feats represent? Where does the dimension of these lines comes from and how do we extract these features?
 # Hint: uncomment and run the following command
 # model_1a_test = alexnet_imagenet_test(); print(model_1a_test)
+
+# visualize top results for a given query
+q_idx = 0 # TODO: find good query candidates
+dataset.vis_top(feats, q_idx)
 
 # run t-SNE
 do_tsne(feats, labels, classes, sec='1a')
@@ -66,8 +66,6 @@ do_tsne(feats, labels, classes, sec='1a')
 model_1b = alexnet_lm()
 print(model_1b)
 # Q: Why do we change the last layer of the AlexNet architecture? How do we initialize the layers of model_1b for finetuning? 
-
-dataset.vis_top(feats, q_idx)
 
 feats = np.load('data/features/alexnet-cls-lm-fc7_ox.npy')
 dataset.vis_top(feats, q_idx)
@@ -168,8 +166,6 @@ dataset.vis_top(feats, q_idx, pq_flag=True)
 q_idx = 0
 model1 = resnet18_rmac()
 model2 = resnet101_rmac()
-# charge weights
-# TODO: maybe here, but it is probably better inside archs.py
 
 model1.eval()
 model2.eval()
