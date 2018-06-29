@@ -96,8 +96,6 @@ class Oxford(Dataset):
                 sim   = np.dot(q_aug, feats.T)
             idx = np.argsort(sim)[::-1]
 
-        ap = self.get_ap(self, q_name, idx)
-
         # visualize:
         nplots = 1 + topk
         bsize  = 20
