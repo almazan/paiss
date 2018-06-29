@@ -4,12 +4,14 @@ import pdb
 import json
 import sys
 from collections import OrderedDict
+from sklearn.metrics import average_precision_score
 import numpy as np
 import subprocess
 import functools
 import getpass
 import matplotlib.pyplot as plt
-import faiss
+
+if os.name != 'nt': import faiss
 
 from .dataset import Dataset
 
@@ -94,7 +96,7 @@ class Oxford(Dataset):
                 sim   = np.dot(q_aug, feats.T)
             idx = np.argsort(sim)[::-1]
 
-        #idx = [i for i in idx.squeeze() if i not in set(self.__q_index)]
+        ap = self.get_ap(self, q_name, idx)
 
         # visualize:
         nplots = 1 + topk
@@ -187,41 +189,6 @@ class Oxford(Dataset):
 
         # Training
         self.pq.train(x)
-
-    def score(self, sim, args):
-        idx = np.argsort(sim, axis=1)[:, ::-1]
-        if not os.path.exists(args.score):
-            os.makedirs(args.score)
-        F = functools.partial(self.__score_rnk_partial,  idx=idx, args=args)
-        #maps = mpmap(F, range(len(self.__q_names)), n_workers=12)
-        maps = list(map(F, list(range(len(self.__q_names)))))
-        # Store query scores individually, but also by query group
-        Q = OrderedDict()
-        with open("{0}/global.score".format(args.score), "w") as f:
-            for i in range(len(self.__q_names)):
-                f.write("{0}: {1}\n".format(self.__q_names[i], 100 * maps[i]))
-                try:
-                    Q[self.__q_names[i][:-2]].append(100 * maps[i])
-                except:
-                    Q[self.__q_names[i][:-2]] = [100 * maps[i]]
-        with open("{0}/group.score".format(args.score), "w") as f:
-            for k in list(Q.keys()):
-                f.write("{0}: {1}\n".format(k, np.mean(Q[k])))
-        return 100 * np.mean(maps)
-
-    def __score_rnk_partial(self, i, idx, args):
-        eval_bin = "./evaluation_scripts/oxford/compute_ap"
-        if "do_distractors" in args and args.do_distractors is not None and args.do_distractors:
-            rnk = np.array([self.__img_filenames[j] if j < self.__N_images else "distractor_{0}".format(j - self.__N_images) for j in idx[i]])
-        else:
-            rnk = np.array(self.__img_filenames)[idx[i]]
-        with open("{0}/{1}.rnk".format(args.score, self.__q_names[i]), 'w') as f:
-            f.write("\n".join(rnk)+"\n")
-        cmd = "{0} {1}{2} {3}/{4}.rnk".format(eval_bin, self.__lab_root, self.__q_names[i], args.score, self.__q_names[i])
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        map_ = float(p.stdout.readlines()[0])
-        p.wait()
-        return map_
 
     def __load(self):
         # Check localtion and deploy if needed:
