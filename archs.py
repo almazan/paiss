@@ -224,23 +224,6 @@ def resnet18_rmac(out_dim=512, dropout_p=None, weights=None, **kwargs):
         model.load_state_dict(weight_dict)
     return model
 
-def resnet152_rmac(out_dim=2048, dropout_p=None, weights=None, **kwargs):
-    """Constructs a ResNet-152 model.
-    """
-    model = ResNet_RMAC(Bottleneck, [3, 8, 36, 3], dropout_p=dropout_p, fc_out=out_dim, **kwargs)
-    if weights:
-        try:
-            if torch.cuda.device_count()>0:
-                weight_dict = torch.load(weights)['state_dict']
-            else:
-                weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})['state_dict']
-        except OSError as e:
-            print ('Weights {} not found. Please follow the instructions to download models.'.format(weights))
-            sys.exit()
-        model.load_state_dict(weight_dict)
-    return model
-
-
 class AlexNet(nn.Module):
 
     def __init__(self, num_classes=1000, training=True):
@@ -288,6 +271,40 @@ class AlexNet(nn.Module):
             x = l2_normalize(x)
         return x
 
+class AlexNet_RMAC(nn.Module):
+
+    def __init__(self, pooling='gem', gemp=3, norm_features=True, showforward=False):
+        super(AlexNet_RMAC, self).__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(64, 192, kernel_size=5, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(192, 384, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(384, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        if pooling == 'gem':
+            self.features.add_module('12', GeneralizedMeanPooling(norm_type=gemp, output_size=1))
+        else:
+            self.features.add_module('12', nn.AdaptiveAvgPool2d(output_size=1))
+        self.norm_features = norm_features
+        self.showforward = showforward
+
+    def forward(self, x):
+        if self.showforward: print('Input size of model.features : '+str(x.shape)+'\n')
+        x = self.features(x)
+        x = x.view(x.shape[0], x.shape[1])
+        if self.norm_features:
+            x = l2_normalize(x)
+        if self.showforward: print('Output size of model.features : '+str(x.shape)+'\n')
+        return x
+
 def alexnet_fc(out_dim=1000, train=True, weights=None, **kwargs):
     model = AlexNet(num_classes=out_dim, training=train)
     model.out_features = out_dim
@@ -302,6 +319,19 @@ def alexnet_fc(out_dim=1000, train=True, weights=None, **kwargs):
         model.load_state_dict(weight_dict)
     return model
 
+def alexnet_rmac(pooling='gem',weights=None, **kwargs):
+    model = AlexNet_RMAC(pooling=pooling)
+    model.out_features = 256
+    if weights:
+        if torch.cuda.device_count()>0:
+            weight_dict = torch.load(weights)
+        else:
+            weight_dict = torch.load(weights, map_location={'cuda:0':'cpu'})
+        del weight_dict['classifier.1.weight']; del weight_dict['classifier.1.bias']
+        del weight_dict['classifier.4.weight']; del weight_dict['classifier.4.bias']
+        del weight_dict['classifier.6.weight']; del weight_dict['classifier.6.bias']
+        model.load_state_dict(weight_dict)
+    return model
 
 # models to be called
 path_models = 'data/models'
@@ -310,3 +340,11 @@ resnet50_cls = lambda : resnet50_rmac(out_dim=586, weights=osp.join(path_models,
 resnet18_rank_DA = lambda : resnet18_rmac(out_dim=512, weights=osp.join(path_models, 'resnet18-rnk-lm-da.pt'))
 resnet50_rank = lambda : resnet50_rmac(out_dim=2048, weights=osp.join(path_models, 'resnet50-rnk-lm.pt'))
 resnet50_rank_DA = lambda : resnet50_rmac(out_dim=2048, weights=osp.join(path_models, 'resnet50-rnk-lm-da.pt'))
+
+# weightless architectures to be called
+alexnet_imagenet = lambda: alexnet_fc(out_dim=1000, train=True)
+alexnet_imagenet_test = lambda: alexnet_fc(out_dim=4096, train=False)
+alexnet_lm = lambda: alexnet_fc(out_dim=586, train=True)
+alexnet_GeM = lambda: alexnet_rmac()
+resnet18 =  lambda : resnet18_rmac(out_dim=586, pooling=None, weights='./models/imagenet_resnet18-classif-fc.pt')
+resnet18_GeM = lambda : resnet18_rmac(out_dim=586, weights='./models/clean_lm_resnet18-cls.pt')
