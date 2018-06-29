@@ -18,8 +18,7 @@ from utils.tsne import do_tsne
 
 np.random.seed(0)
 
-## Section 1: Training
-
+#### Section 1: Training ####
 # 1a: AlexNet architecture
 # 1b: Finetuning on Landmarks
 # 1c: Generalized Mean Poolimg (GeM)
@@ -42,7 +41,10 @@ print(classes.tolist())
 # visualize Oxford queries
 dataset.vis_queries()
 
-# Subsection 1a: AlexNet architecture
+
+
+
+#### 1a: AlexNet architecture ####
 model_1a = alexnet_imagenet()
 print(model_1a)
 # Q: The original AlexNet model is trained for classification on ImageNet dataset, that contains 1000 image classes. What is the number of dimensions of the output of the model? What does each dimension represents?
@@ -62,7 +64,10 @@ dataset.vis_top(feats, q_idx)
 do_tsne(feats, labels, classes, sec='1a')
 # Q: What can be observe from the t-SNE visualization? Which classes 'cluster' well? Which do not?
 
-# Subsection 1b: Finetuning on Landmarks
+
+
+
+#### 1b: Finetuning on Landmarks ####
 model_1b = alexnet_lm()
 print(model_1b)
 # Q: Why do we change the last layer of the AlexNet architecture? How do we initialize the layers of model_1b for finetuning? 
@@ -75,7 +80,11 @@ do_tsne(feats, labels, classes, sec='1b')
 
 # question on how the architecture demands the resize of the input images (specifically, the fully connected layers) ##########
 
-# Subsection 1c: Generalized Mean Pooling (GeM)
+
+
+
+
+#### 1c: Generalized Mean Pooling (GeM) ####
 model_1c = alexnet_GeM()
 print(model_1c)
 # Q: For this model, we remove all fully connected layers (classifier layers) and replace the last max pooling layer by an aggregation pooling layer (more details about this layer in the next subsection)
@@ -87,9 +96,11 @@ dataset.vis_top(feats, q_idx)
 
 do_tsne(feats, labels, classes, sec='1c')
 # Q: How does the aggregation layer changes the t-SNE visualization? Can we see some structure in the clusters of similarly labeled images?
-del model_1a, model_1b, model_1c
 
-# Subsection 1d: Resnet18 architecture with aggregation pooling
+
+
+
+#### 1d: Resnet18 architecture with aggregation pooling ####
 model_0 = resnet18()
 model_1d = resnet18_GeM()
 print(model_0.adpool)
@@ -108,7 +119,10 @@ dataset.vis_top(feats, q_idx)
 do_tsne(feats, labels, classes, sec='1d')
 # Q: How does this model compare with model 1c, that was trained in the same dataset for the same task? How does is compare to the finetuned models of 1b?
 
-# Subsection 1e: PCA
+
+
+
+#### 1e: PCA ####
 
 # We learn PCA mean and standard deviation on landmarks and apply it to the output of model_1d
 feats = np.load('data/features/resnet18-cls-lm-pca_ox.npy')
@@ -117,9 +131,10 @@ do_tsne(feats, labels, classes, sec='1e')
 do_tsne(feats, labels, classes, sec='1e', show_unlabeled=True)
 # Q: What can we say about the separation of data when included unlabeled images? And the distribution of the unlabeled features? How can we train a model to separate labeled from unlabeled data? 
 
-del model_1d
 
-# Subsection 1f: Finetuning on Landmarks for retrieval
+
+
+#### 1f: Finetuning on Landmarks for retrieval ####
 # For sections 1f to 1h, we use the architecture presented by model_1d
 dataset.vis_triplets()
 
@@ -129,17 +144,26 @@ do_tsne(feats, labels, classes, sec='1f')
 do_tsne(feats, labels, classes, sec='1f', show_unlabeled=True)
 # Q: Compare the plots with unlabeled data of the model trained for retrieval (with triplet loss) and the model trained for classification of the previous subsection. How does it change?
 
-# 1g: Data augmentation
+
+
+
+#### 1g: Data augmentation ####
 feats = np.load('data/features/resnet18-rnk-lm-da_ox.npy')
 dataset.vis_top(feats, q_idx) 
 
 do_tsne(feats, labels, classes, sec='1g')
 
-# 1h: Multi-resolution
+
+
+
+#### 1h: Multi-resolution ####
 feats = np.load('data/features/resnet18-rnk-lm-da_mr_ox.npy')
 dataset.vis_top(feats, q_idx) 
 
 do_tsne(feats, labels, classes, sec='1g')
+
+
+
 
 # 1i: Improved architectures
 
