@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
+import os
 
 np.random.seed(0)
 
-def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
+def do_tsne(feats, labs, cls, show_unlabeled=False, sec='', savefig=True):
     # hyperparameters:
     n_pca  = 100
     n_cls  = 12
@@ -41,12 +42,12 @@ def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
     # Visualize the results
     fig, ax   = plt.subplots()
     values    = range(n_cls) if show_unlabeled else range(1,n_cls)
-    jet  = cm = plt.get_cmap('jet') 
+    jet  = cm = plt.get_cmap('jet')
     cNorm     = colors.Normalize(vmin=0, vmax=values[-1])
     scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
     for c in values:
         colorVal  = scalarMap.to_rgba(c)
-        embed_idx = np.where(labsc == cls[c])[0] 
+        embed_idx = np.where(labsc == cls[c])[0]
         embed_x   = feats_tsne[embed_idx,0]
         embed_y   = feats_tsne[embed_idx,1]
         ax.scatter(embed_x, embed_y, c=colorVal, label=cls[c])
@@ -57,6 +58,13 @@ def do_tsne(feats, labs, cls, show_unlabeled=False, sec=''):
     fig.tight_layout()
     plt.show()
     input('2-dimensional t-sne plot. Press enter to continue' % cls)
+
+    if savefig:
+        out_fname = 'results/tsne_sect-{}.png'.format(sec)
+        if not os.path.exists(os.path.dirname(out_fname)):
+            os.makedirs(os.path.dirname(out_fname))
+        plt.savefig(out_fname, bbox_inches='tight')
+
     plt.close()
 
 if __name__ == "__main__":
