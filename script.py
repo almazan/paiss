@@ -13,12 +13,15 @@ from torch import nn
 
 from datasets import create
 from archs import *
-#from utils.test import q_eval TODO: uncomment this when test.py is commited
+from utils.test import q_eval
 from utils.tsne import do_tsne
 
 np.random.seed(0)
 
+#############################
 #### Section 1: Training ####
+#############################
+
 # 1a: AlexNet architecture
 # 1b: Finetuning on Landmarks
 # 1c: Generalized Mean Poolimg (GeM)
@@ -174,27 +177,32 @@ do_tsne(feats, labels, classes, sec='1g')
 q_idx = 0
 feats = np.load('data/features/resnet50-rnk-lm-da_ox.npy')
 
-# load weights:
-model = resnet50_rmac()
+# load models:
+model1 = resnet50_rank()
+model2 = resnet50_rank_DA()
 
-model.eval()
+model1.eval()
+model2.eval()
 # Q: What does it change in the model's architecture when we pass it to evaluation mode?
 # Hint: Which layers used in training are not useful for testing?
 
 # evaluate model for query
-q_feat = q_eval(model, dataset, q_idx)
+q_feat = q_eval(model1, dataset, q_idx)
 dataset.vis_top(feats, q_idx, q_feat)
 
 
 #### Section 2a: Robustness to input transformations
 
-q_feat = q_eval(model, dataset, q_idx, flip=True)
+q_feat = q_eval(model1, dataset, q_idx, flip=True)
 dataset.vis_top(feats, q_idx, q_feat)
 # Q1: What is the impact of flipping the query image?
 
-q_feat = q_eval(model, dataset, q_idx, rotate=5.)
-dataset.vis_top(feats, q_idx, q_feat)
-# Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable?
+q_feat1 = q_eval(model1, dataset, q_idx, rotate=5.)
+dataset.vis_top(feats, q_idx, q_feat1)
+
+q_feat2 = q_eval(model2, dataset, q_idx, rotate=5.)
+dataset.vis_top(feats, q_idx, q_feat2)
+# Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable? How does the models (model1 trained without image rotation, model2 trained with) compare?
 
 
 #### Section 2b: Queries with multi-scale features
