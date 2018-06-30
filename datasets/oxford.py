@@ -70,7 +70,7 @@ class Oxford(Dataset):
     def get_query_roi(self, i):
         return self.__q_roi[self.__q_names[i]]
 
-    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, dfs='', out_image_file=None):
+    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, dfs='', out_image_file=None, ap_flag=False):
         q_name = self.__q_names[q_idx]
         q_idx = self.__q_index[q_idx]
         if q_feat is None: q_feat = feats[q_idx]
@@ -105,8 +105,10 @@ class Oxford(Dataset):
 
             idx = np.argsort(sim)[::-1]
 
-        ap = self.get_ap(q_name, idx)
-        print('AP={:.2f}'.format(ap * 100.))
+        # compute ap?
+        if ap_flag:
+            ap = self.get_ap(q_name, idx)
+            print('AP={:.2f}'.format(ap * 100.))
 
         # visualize:
         nplots = 1 + topk

@@ -250,18 +250,18 @@ dataset.vis_top(feats, q_idx, nqe=5, aqe=3.0)
 #### Subsection 2g: Diffusion
 
 q_idx = 0
-dataset.vis_top(feats, q_idx)
-dataset.vis_top(feats, q_idx, dfs='it:int20')
+dataset.vis_top(feats, q_idx, ap_flag=True)
+dataset.vis_top(feats, q_idx, dfs='it:int20', ap_flag=True)
 # Parameters for dfs are passed as strings with datatypes indicated. The default parameter string is:
 #    'alpha:float0.99_it:int20_tol:float1e-6_gamma:float3_ks:100-30_trunc:bool_bsize:int100000_fsr:bool_IS:bool_wgt:bool_bs:bool_reg:bool_split:int0_gmp:bool'
 #    strings passed to the dfs parameter overwrite the default parameters
 
 # Q1: The affinity matrix is computed using the similarity measure s = <f_i, f_j>^alpha, where 0 < alpha <= 1.0. Use dfs='alpha:float<alpha>' for different values of alpha. What is the impact of changing it? E.g:
-dataset.vis_top(feats, q_idx, dfs='alpha:float0.8')
+dataset.vis_top(feats, q_idx, dfs='alpha:float0.8', ap_flag=True)
 
 # Q2: k_q is the number of database items to use for diffusion. Use dfs='ks:100-<k_q>' for different values of k_q. What is the impact of changing it? E.g: 
-dataset.vis_top(feats, q_idx, dfs='ks:100-5')
+dataset.vis_top(feats, q_idx, dfs='ks:100-5', ap_flag=True)
 
 # Q3: trunc is the number of sub-rows and columns to use for diffusion. Use dfs='trunc:int<trunc>' for different values of trunc. What is the impact of changing it? E.g:
-dataset.vis_top(feats, q_idx, dfs='trunc:int2000')
+dataset.vis_top(feats, q_idx, dfs='trunc:int2000', ap_flag=True)
 # Q4: What is the maximum value of trunc and what case does it generalize to?
