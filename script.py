@@ -21,14 +21,12 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Demo')
 
-parser.add_argument('--sect', type=str, default='init', required=False, help='Select section')
+parser.add_argument('--sect', type=str, default='init', required=False, help='Selects the section to run')
 parser.add_argument('--qidx', type=int, required=False, help='Query index')
-parser.add_argument('--show_tsne', type=bool, default=True, required=False, help='Computes and shows TSNE')
+parser.add_argument('--hide_tsne', dest='show_tsne', action='store_false', default=True, help='Skips the TSNE computation')
 args = parser.parse_args()
 
 np.random.seed(0)
-if args.qidx is not None:
-    q_idx = args.qidx
 
 #############################
 #### Section 1: Training ####
@@ -78,7 +76,7 @@ elif args.sect == '1a':
     # model_1a_test = alexnet_imagenet_fc7(); print(model_1a_test)
 
     # visualize top results for a given query
-    q_idx = 0 # TODO: find good query candidates
+    q_idx = args.qidx if args.qidx is not None else 0
 
     dataset.vis_top(dfeats, q_idx)
 
@@ -98,7 +96,7 @@ elif args.sect == '1b':
 
     dfeats = np.load(models_dict['alexnet-cls-lm-fc7']['dataset'])
     qfeats = np.load(models_dict['alexnet-cls-lm-fc7']['queries'])
-    q_idx = 0 # TODO: find good query candidates
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
 
     if args.show_tsne:
@@ -122,7 +120,7 @@ elif args.sect == '1c':
     qfeats = np.load(models_dict['alexnet-cls-lm-gem']['queries'])
     print(dfeats.shape)
     # Q: Why does the size of the feature representation changes? Why does the size of the feature representation is important for a image retrieval task?
-    q_idx = 0 # TODO: find good query candidates
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
 
     if args.show_tsne:
@@ -149,7 +147,7 @@ elif args.sect == '1d':
     print(norm(dfeats[:10], axis=1))
     print(dfeats.shape)
     # visualize top results for a given query index
-    q_idx = 0
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
 
     if args.show_tsne:
@@ -166,9 +164,9 @@ elif args.sect == '1e':
     dfeats = np.load(models_dict['resnet18-cls-lm-gem-pcaw']['dataset'])
     qfeats = np.load(models_dict['resnet18-cls-lm-gem-pcaw']['queries'])
     if args.show_tsne:
-        do_tsne(dfeats, labels, classes, sec='1e')
+        do_tsne(dfeats, labels, classes, sec='1e-1')
         # run t-SNE including unlabeled images
-        do_tsne(dfeats, labels, classes, sec='1e', show_unlabeled=True)
+        do_tsne(dfeats, labels, classes, sec='1e-2', show_unlabeled=True)
         # Q: What can we say about the separation of data when included unlabeled images? And the distribution of the unlabeled features? How can we train a model to separate labeled from unlabeled data?
 
 
@@ -182,11 +180,11 @@ elif args.sect == '1f':
 
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem']['queries'])
-    q_idx = 0
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
     if args.show_tsne:
-        do_tsne(dfeats, labels, classes, sec='1f')
-        do_tsne(dfeats, labels, classes, sec='1f', show_unlabeled=True)
+        do_tsne(dfeats, labels, classes, sec='1f-1')
+        do_tsne(dfeats, labels, classes, sec='1f-2', show_unlabeled=True)
         # Q: Compare the plots with unlabeled data of the model trained for retrieval (with triplet loss) and the model trained for classification of the previous subsection. How does it change?
 
 
@@ -198,7 +196,7 @@ elif args.sect == '1g':
     # cropping, pixel jittering, rotation, tilting
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem-da']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem-da']['queries'])
-    q_idx = 0
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
 
     if args.show_tsne:
@@ -209,12 +207,13 @@ elif args.sect == '1g':
 elif args.sect == '1h':
 
     #### 1h: Multi-resolution ####
+    # Using the same model as the one in sect-1g, we extract features at 4
+    # different resolutions and average the outputs
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem-da-mr']['queries'])
-    q_idx = 0
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
 
-    import pdb; pdb.set_trace()  # XXX BREAKPOINT
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1h')
 
@@ -223,9 +222,10 @@ elif args.sect == '1h':
 elif args.sect == '1i':
 
     # 1i: Improved architecture
+    # Finally, we upgrade the backbone architecture to Resnet50
     dfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['queries'])
-    q_idx = 0
+    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
 
     if args.show_tsne:
@@ -237,7 +237,7 @@ elif args.sect == '2':
     ####      Section 2: Testing       ####
     #######################################
 
-    q_idx = 0
+    q_idx = args.qidx if args.qidx is not None else 0
     dfeats = np.load(models_dict['resnet50-rnk-lm-gem-da']['dataset'])
 
     # load models:
@@ -287,49 +287,49 @@ elif args.sect == '2':
 
 
     ## Subsection 2d: Robustness to compression (using PQ)
-    q_idx = 0
-    dataset.vis_top(feats, q_idx, ap_flag=True)
+    q_idx = args.qidx if args.qidx is not None else 0
+    dataset.vis_top(dfeats, q_idx, ap_flag=True)
 
     m = 256      # number of subquantizers
     n_bits = 8   # bits allocated per subquantizer
 
-    feats_train = np.load('data/features/resnet50-rnk-lm-da_lmforPQ.npy')
+    feats_train = np.load(models_dict['resnet50-rnk-lm-gem-da']['training'])
     dataset.pq_train(feats_train, m, n_bits)
 
     # dataset to encode
     dataset.pq_add(feats)
 
     # search:
-    dataset.vis_top(feats, q_idx, pq_flag=True, ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, pq_flag=True, ap_flag=True)
     # Q1: How much memory (in bytes) is needed to store the compressed representation?
     # Q2: What is the compression ratio?
     # Q3: How did the compression affect the retrieval results?
     # Q4: Change the values and m & n_bit and observe the change in retrieval performance.
 
     ## Subsection 2e: Average query expansion
-    dataset.vis_top(feats, q_idx, nqe=3, ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, nqe=3, ap_flag=True)
     # nqe is the number of database items with which to expand the query.
     # Q1: What is the impact of using different values of nqe?
 
     ## Subsection 2f: alpha query expansion
-    dataset.vis_top(feats, q_idx, nqe=5, aqe=3.0, ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, nqe=5, aqe=3.0, ap_flag=True)
     # aqe is the value of alpha applied for alpha query expansion.
     # Q1: How should nqe be chosen? Hint: What is the impact of low prec@K (where K is equivalent to nqe) on aqe?
     # Q2: What is the impact of using different values of nqe, aqe?
 
     ## Subsection 2g: Diffusion
-    dataset.vis_top(feats, q_idx, dfs='it:int20', ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, dfs='it:int20', ap_flag=True)
     # Parameters for dfs are passed as strings with datatypes indicated. The default parameter string is:
     #    'alpha:float0.99_it:int20_tol:float1e-6_gamma:float3_ks:100-30_trunc:bool_bsize:int100000_fsr:bool_IS:bool_wgt:bool_bs:bool_reg:bool_split:int0_gmp:bool'
     #    strings passed to the dfs parameter overwrite the default parameters
 
     # Q1: The affinity matrix is computed using the similarity measure s = <f_i, f_j>^alpha, where 0 < alpha <= 1.0. Use dfs='alpha:float<alpha>' for different values of alpha. What is the impact of changing it? E.g:
-    dataset.vis_top(feats, q_idx, dfs='alpha:float0.8', ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, dfs='alpha:float0.8', ap_flag=True)
 
     # Q2: k_q is the number of database items to use for diffusion. Use dfs='ks:100-<k_q>' for different values of k_q. What is the impact of changing it? E.g:
-    dataset.vis_top(feats, q_idx, dfs='ks:100-5', ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, dfs='ks:100-5', ap_flag=True)
 
     # Q3: trunc is the number of sub-rows and columns to use for diffusion. Use dfs='trunc:int<trunc>' for different values of trunc. What is the impact of changing it? E.g:
-    dataset.vis_top(feats, q_idx, dfs='trunc:int2000', ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, dfs='trunc:int2000', ap_flag=True)
     # Q4: What is the maximum value of trunc and what case does it generalize to?
 
