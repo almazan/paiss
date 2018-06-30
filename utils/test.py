@@ -22,6 +22,9 @@ def q_eval(net, dataset, q_idx, flip=False, rotate=False, scale=1):
     elif scale == 1:
         edge_list = [800]
         resize_list = [lambda im: imresize(im, edge) for edge in edge_list]
+    elif scale == 1.5:
+        edge_list = [1200]
+        resize_list = [lambda im: imresize(im, edge) for edge in edge_list]
     elif scale == 2: # multiscale
         edge_list = [600,800,1000,1200]
         resize_list = [lambda im: imresize(im, edge) for edge in edge_list]
