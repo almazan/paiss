@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 if os.name != 'nt': import faiss
 
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" # OMP issue described here: https://github.com/dmlc/xgboost/issues/1715
+
 from .dataset import Dataset
 from dfs import reg_diffusion
 
@@ -70,7 +72,7 @@ class Oxford(Dataset):
     def get_query_roi(self, i):
         return self.__q_roi[self.__q_names[i]]
 
-    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, dfs='', out_image_file=None):
+    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, dfs='', out_image_file=None, ap_flag=False):
         q_name = self.__q_names[q_idx]
         q_idx = self.__q_index[q_idx]
         if q_feat is None: q_feat = feats[q_idx]
@@ -78,13 +80,15 @@ class Oxford(Dataset):
         if pq_flag:
             # perform AQE?
             if nqe > 0:
-                D, idx = self.pq_search(q_feat, k=nqe)
-                q_aug = np.vstack([feats[j] * np.exp(-D[j])**aqe for j in idx])
-                q_aug = np.mean(np.vstack((q_feat, q_aug)), axis=0)
-                q_aug = q_aug / np.linalg.norm(q_aug)
-                _, idx = self.pq_search(q_aug, k=topk+1)
+                _, idx = self.pq_search(q_feat, k=nqe)
+                idx    = idx[0]
+                q_aug  = np.vstack([feats[j] * np.exp(-D[j])**aqe for j in idx])
+                q_aug  = np.mean(np.vstack((q_feat, q_aug)), axis=0)
+                q_aug  = q_aug / np.linalg.norm(q_aug)
+                _, idx = self.pq_search(q_aug, k=self.N_images)
             else:
-                _, idx = self.pq_search(q_feat, k=topk+1)
+                _, idx = self.pq_search(q_feat, k=self.N_images)
+            idx = idx[0]
         else:
             sim = np.dot(q_feat, feats.T)
 
@@ -105,8 +109,10 @@ class Oxford(Dataset):
 
             idx = np.argsort(sim)[::-1]
 
-        ap = self.get_ap(q_name, idx)
-        print('AP={:.2f}'.format(ap * 100.))
+        # compute ap?
+        if ap_flag:
+            ap = self.get_ap(q_name, idx)
+            print('AP={:.2f}'.format(ap * 100.))
 
         # visualize:
         nplots = 1 + topk

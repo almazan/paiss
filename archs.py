@@ -85,11 +85,11 @@ class Bottleneck(nn.Module):
 
 class ResNet_RMAC(nn.Module):
 
-    def __init__(self, block, layers, fc_out, norm_features=True, pooling='gem',
+    def __init__(self, block, layers, fc_out, norm_features=True, aggreagation='gem',
                  dropout_p=None, gemp=3, without_fc=False):
         self.inplanes = 64
         self.norm_features = norm_features
-        self.pooling = pooling
+        self.aggreagation = aggreagation
         self.without_fc = without_fc
         self.out_features = fc_out
         super(ResNet_RMAC, self).__init__()
@@ -112,13 +112,13 @@ class ResNet_RMAC(nn.Module):
                 m.bias.data.zero_()
 
         # Aggregation layer
-        if pooling == None:
+        if aggreagation == None:
             self.adpool = nn.AvgPool2d(kernel_size=7, stride=1, padding=0)
-        elif pooling == 'max':
+        elif aggreagation == 'max':
             self.adpool = nn.AdaptiveMaxPool2d(output_size=1)
-        elif pooling == 'avg':
+        elif aggregation == 'avg':
             self.adpool = nn.AdaptiveAvgPool2d(output_size=1)
-        elif pooling == 'gem':
+        elif aggreagation == 'gem':
             self.adpool = GeneralizedMeanPooling(norm_type=gemp, output_size=1)
 
         self.dropout = nn.Dropout(dropout_p) if dropout_p is not None else None
@@ -273,7 +273,7 @@ class AlexNet(nn.Module):
 
 class AlexNet_RMAC(nn.Module):
 
-    def __init__(self, pooling='gem', gemp=3, norm_features=True, showforward=False):
+    def __init__(self, aggreagation='gem', gemp=3, norm_features=True, showforward=False):
         super(AlexNet_RMAC, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
@@ -289,7 +289,7 @@ class AlexNet_RMAC(nn.Module):
             nn.Conv2d(256, 256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
         )
-        if pooling == 'gem':
+        if aggreagation == 'gem':
             self.features.add_module('12', GeneralizedMeanPooling(norm_type=gemp, output_size=1))
         else:
             self.features.add_module('12', nn.AdaptiveAvgPool2d(output_size=1))
@@ -319,8 +319,8 @@ def alexnet_fc(out_dim=1000, train=True, weights=None, **kwargs):
         model.load_state_dict(weight_dict)
     return model
 
-def alexnet_rmac(pooling='gem',weights=None, **kwargs):
-    model = AlexNet_RMAC(pooling=pooling)
+def alexnet_rmac(aggreagation='gem',weights=None, **kwargs):
+    model = AlexNet_RMAC(aggreagation=aggreagation)
     model.out_features = 256
     if weights:
         if torch.cuda.device_count()>0:
@@ -343,8 +343,8 @@ resnet50_rank_DA = lambda : resnet50_rmac(out_dim=2048, weights=osp.join(path_mo
 
 # weightless architectures to be called
 alexnet_imagenet = lambda: alexnet_fc(out_dim=1000, train=True)
-alexnet_imagenet_test = lambda: alexnet_fc(out_dim=4096, train=False)
+alexnet_imagenet_fc7 = lambda: alexnet_fc(out_dim=4096, train=False)
 alexnet_lm = lambda: alexnet_fc(out_dim=586, train=True)
 alexnet_GeM = lambda: alexnet_rmac()
-resnet18 =  lambda : resnet18_rmac(out_dim=586, pooling=None)
-resnet18_GeM = lambda : resnet18_rmac(out_dim=586)
+resnet18 =  lambda : resnet18_rmac(out_dim=586, aggragation=None)
+resnet18_GeM = lambda : resnet18_rmac(out_dim=512)
