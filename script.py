@@ -167,14 +167,59 @@ do_tsne(feats, labels, classes, sec='1g')
 
 # 1i: Improved architectures
 
+#######################################
+####      Section 2: Testing       ####
+#######################################
 
-# Subsection 2c: PQ compression
-m = 256        # number of subquantizers
+q_idx = 0
+feats = np.load('data/features/resnet50-rnk-lm-da_ox.npy')
+
+# load weights:
+model = resnet50_rmac()
+
+model.eval()
+# Q: What does it change in the model's architecture when we pass it to evaluation mode?
+# Hint: Which layers used in training are not useful for testing?
+
+# evaluate model for query
+q_feat = q_eval(model, dataset, q_idx)
+dataset.vis_top(feats, q_idx, q_feat)
+
+
+#### Section 2a: Robustness to input transformations
+
+q_feat = q_eval(model, dataset, q_idx, flip=True)
+dataset.vis_top(feats, q_idx, q_feat)
+# Q1: What is the impact of flipping the query image?
+
+q_feat = q_eval(model, dataset, q_idx, rotate=5.)
+dataset.vis_top(feats, q_idx, q_feat)
+# Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable?
+
+
+#### Section 2b: Queries with multi-scale features
+
+q_feat = q_eval(model, dataset, q_idx, scales=1)
+dataset.vis_top(feats, q_idx, q_feat)
+
+q_feat = q_eval(model, dataset, q_idx, scales=2)
+dataset.vis_top(feats, q_idx, q_feat)
+# Q: What is the impact of using more scales?
+
+
+#### Section 2c: Robustness to resolution changes
+
+q_feat = q_eval(model, dataset, q_idx, resize=1.5)
+dataset.vis_top(feats, q_idx, q_feat)
+# Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
+
+
+#### Subsection 2d: Robustness to compression (using PQ)
+
+m = 256      # number of subquantizers
 n_bits = 8   # bits allocated per subquantizer
 
-q_idx = 0 
-feats = np.load('/nfs/team/cv/PAISS/PAISS2018/data/features/oxford_resnet50-ranking-lm_crop-tilt-rot-pjit.npy')
-feats_train = np.load('/tmp-network/user/jalmazan/l2/retrieval/scores_ranking/Oxford/resnet50/Landmarks2_clsLM18_S800_gem_adam_lr5_crop1_tilt15_rotate20_pixjit_10240/features_for_pca.npy')
+feats_train = np.load('data/features/resnet50-rnk-lm-da_ox.npy')
 dataset.pq_train(feats_train, m, n_bits)
 
 # dataset to encode
@@ -187,37 +232,36 @@ dataset.vis_top(feats, q_idx, pq_flag=True)
 # Q3: How did the compression affect the retrieval results?
 # Q4: Change the values and m & n_bit and observe the change in retrieval performance.
 
-## Section 2: Testing
-q_idx = 0
-model1 = resnet18_rmac()
-model2 = resnet101_rmac()
 
-model1.eval()
-model2.eval()
-# Q: What does it change in the models' architecture when we pass it to evaluation mode? Hint: Which layers used in training are not useful for testing?
+#### Subsection 2e: Average query expansion
 
-# evaluate model for query
-q_feat1 = q_eval(model1, dataset, q_idx)
-dataset.vis_top(feats, q_idx, q_feat1)
-
-q_feat2 = q_eval(model2, dataset, q_idx)
-dataset.vis_top(feats, q_idx, q_feat2)
-## Subsection 2a: cropping, flipping, rotating
-q_feat = q_eval(model, dataset, q_idx, flip=True)
-dataset.vis_top(feats, q_idx, q_feat)
-
-## Section 3: Re-ranking
-
-## Subsection 3a: Query expansion
-
-#AQE
 dataset.vis_top(feats, q_idx, nqe=3)
+# nqe is the number of database items with which to expand the query.
+# Q1: What is the impact of using different values of nqe?
 
-#alphaQE
+## Subsection 2f: alpha query expansion
+
 dataset.vis_top(feats, q_idx, nqe=5, aqe=3.0)
-# Q: How should aqe be chosen? Hint: What is the impact of low prec@K on aqe=K?
+# aqe is the value of alpha applied for alpha query expansion.
+# Q1: How should nqe be chosen? Hint: What is the impact of low prec@K (where K is equivalent to nqe) on aqe?
+# Q2: What is the impact of using different values of nqe, aqe?
 
-# Q: What is the impact of using different values of K, alpha?
 
-# Subsection 3b: Diffusion
-# Q: What is the impact of truncation, using different values of k_q?
+#### Subsection 2g: Diffusion
+
+q_idx = 0
+dataset.vis_top(feats, q_idx)
+dataset.vis_top(feats, q_idx, dfs='it:int20')
+# Parameters for dfs are passed as strings with datatypes indicated. The default parameter string is:
+#    'alpha:float0.99_it:int20_tol:float1e-6_gamma:float3_ks:100-30_trunc:bool_bsize:int100000_fsr:bool_IS:bool_wgt:bool_bs:bool_reg:bool_split:int0_gmp:bool'
+#    strings passed to the dfs parameter overwrite the default parameters
+
+# Q1: The affinity matrix is computed using the similarity measure s = <f_i, f_j>^alpha, where 0 < alpha <= 1.0. Use dfs='alpha:float<alpha>' for different values of alpha. What is the impact of changing it? E.g:
+dataset.vis_top(feats, q_idx, dfs='alpha:float0.8')
+
+# Q2: k_q is the number of database items to use for diffusion. Use dfs='ks:100-<k_q>' for different values of k_q. What is the impact of changing it? E.g: 
+dataset.vis_top(feats, q_idx, dfs='ks:100-5')
+
+# Q3: trunc is the number of sub-rows and columns to use for diffusion. Use dfs='trunc:int<trunc>' for different values of trunc. What is the impact of changing it? E.g:
+dataset.vis_top(feats, q_idx, dfs='trunc:int2000')
+# Q4: What is the maximum value of trunc and what case does it generalize to?
