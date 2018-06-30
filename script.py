@@ -10,6 +10,7 @@ import numpy as np
 from numpy.linalg import norm
 import torch
 from torch import nn
+import json
 
 from datasets import create
 from archs import *
@@ -42,6 +43,9 @@ print(classes.tolist())
 dataset.vis_queries()
 
 
+# load the dictionary of the available models and features
+with open('data/models.json', 'r') as fp:
+    models = json.load(fp)
 
 
 #### 1a: AlexNet architecture ####
@@ -49,16 +53,18 @@ model_1a = alexnet_imagenet()
 print(model_1a)
 # Q: The original AlexNet model is trained for classification on ImageNet dataset, that contains 1000 image classes. What is the number of dimensions of the output of the model? What does each dimension represents?
 
-feats = np.load('data/features/alexnet-cls-imagenet-fc7_ox.npy')
-print(norm(feats[:10], axis=1))
-print(feats.shape)
+dfeats = np.load(models['alexnet-cls-imagenet-fc7']['dataset'])
+qfeats = np.load(models['alexnet-cls-imagenet-fc7']['queries'])
+print(norm(dfeats[:10], axis=1))
+print(dfeats.shape)
 # Q: What does each line of the matrix feats represent? Where does the dimension of these lines comes from and how do we extract these features?
 # Hint: uncomment and run the following command
-# model_1a_test = alexnet_imagenet_test(); print(model_1a_test)
+# model_1a_test = alexnet_imagenet_fc7(); print(model_1a_test)
 
 # visualize top results for a given query
 q_idx = 0 # TODO: find good query candidates
-dataset.vis_top(feats, q_idx)
+
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
 
 # run t-SNE
 do_tsne(feats, labels, classes, sec='1a')
@@ -70,12 +76,13 @@ do_tsne(feats, labels, classes, sec='1a')
 #### 1b: Finetuning on Landmarks ####
 model_1b = alexnet_lm()
 print(model_1b)
-# Q: Why do we change the last layer of the AlexNet architecture? How do we initialize the layers of model_1b for finetuning? 
+# Q: Why do we change the last layer of the AlexNet architecture? How do we initialize the layers of model_1b for finetuning?
 
-feats = np.load('data/features/alexnet-cls-lm-fc7_ox.npy')
-dataset.vis_top(feats, q_idx)
+dfeats = np.load(models['alexnet-cls-lm-fc7']['dataset'])
+qfeats = np.load(models['alexnet-cls-lm-fc7']['queries'])
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
 # run t-SNE
-do_tsne(feats, labels, classes, sec='1b')
+do_tsne(dfeats, labels, classes, sec='1b')
 # Q: How does the visualization change after finetuning? What about the top results?
 
 # question on how the architecture demands the resize of the input images (specifically, the fully connected layers) ##########
@@ -89,18 +96,19 @@ model_1c = alexnet_GeM()
 print(model_1c)
 # Q: For this model, we remove all fully connected layers (classifier layers) and replace the last max pooling layer by an aggregation pooling layer (more details about this layer in the next subsection)
 
-feats = np.load('data/features/alexnet-cls-lm_ox.npy')
-print(feats.shape)
+dfeats = np.load(models['alexnet-cls-lm-gem']['dataset'])
+qfeats = np.load(models['alexnet-cls-lm-gem']['queries'])
+print(dfeats.shape)
 # Q: Why does the size of the feature representation changes? Why does the size of the feature representation is important for a image retrieval task?
-dataset.vis_top(feats, q_idx)
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
 
-do_tsne(feats, labels, classes, sec='1c')
+do_tsne(dfeats, labels, classes, sec='1c')
 # Q: How does the aggregation layer changes the t-SNE visualization? Can we see some structure in the clusters of similarly labeled images?
 
 
 
 
-#### 1d: Resnet18 architecture with aggregation pooling ####
+#### 1d: Resnet18 architecture with GeM pooling ####
 model_0 = resnet18()
 model_1d = resnet18_GeM()
 print(model_0.adpool)
@@ -109,58 +117,66 @@ print(model_1a.adpool)
 # Hint: You can see the code of the generalized mean pooling in file pooling.py
 
 # load oxford features from ResNet18 model
-feats = np.load('data/features/resnet18-cls-lm_ox.npy')
-print(norm(feats[:10], axis=1))
-print(feats.shape)
+dfeats = np.load(models['resnet18-cls-lm-gem']['dataset'])
+qfeats = np.load(models['resnet18-cls-lm-gem']['queries'])
+print(norm(dfeats[:10], axis=1))
+print(dfeats.shape)
 # visualize top results for a given query index
 q_idx = 0
-dataset.vis_top(feats, q_idx)
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
 
-do_tsne(feats, labels, classes, sec='1d')
+do_tsne(dfeats, labels, classes, sec='1d')
 # Q: How does this model compare with model 1c, that was trained in the same dataset for the same task? How does is compare to the finetuned models of 1b?
 
 
 
 
-#### 1e: PCA ####
+#### 1e: PCA Whitening ####
 
-# We learn PCA mean and standard deviation on landmarks and apply it to the output of model_1d
-feats = np.load('data/features/resnet18-cls-lm-pca_ox.npy')
-do_tsne(feats, labels, classes, sec='1e')
+# We use a PCA learnt on landmarks to whiten the output features of 'resnet18-cls-lm-gem'
+dfeats = np.load(models['resnet18-cls-lm-gem-pcaw']['dataset'])
+qfeats = np.load(models['resnet18-cls-lm-gem-pcaw']['queries'])
+do_tsne(dfeats, labels, classes, sec='1e')
 # run t-SNE including unlabeled images
-do_tsne(feats, labels, classes, sec='1e', show_unlabeled=True)
-# Q: What can we say about the separation of data when included unlabeled images? And the distribution of the unlabeled features? How can we train a model to separate labeled from unlabeled data? 
+do_tsne(dfeats, labels, classes, sec='1e', show_unlabeled=True)
+# Q: What can we say about the separation of data when included unlabeled images? And the distribution of the unlabeled features? How can we train a model to separate labeled from unlabeled data?
 
 
 
 
 #### 1f: Finetuning on Landmarks for retrieval ####
-# For sections 1f to 1h, we use the architecture presented by model_1d
+# Now we learn the architecture presented in 1e in and end-to-end manner for the retrieval task
+# The architecture includes a FC that replaces the PCA projection
 dataset.vis_triplets()
 
-feats = np.load('data/features/resnet18-rnk-lm_ox.npy')
-dataset.vis_top(feats, q_idx)
-do_tsne(feats, labels, classes, sec='1f')
-do_tsne(feats, labels, classes, sec='1f', show_unlabeled=True)
+dfeats = np.load(models['resnet18-rnk-lm-gem']['dataset'])
+qfeats = np.load(models['resnet18-rnk-lm-gem']['queries'])
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
+do_tsne(dfeats, labels, classes, sec='1f')
+do_tsne(dfeats, labels, classes, sec='1f', show_unlabeled=True)
 # Q: Compare the plots with unlabeled data of the model trained for retrieval (with triplet loss) and the model trained for classification of the previous subsection. How does it change?
 
 
 
 
 #### 1g: Data augmentation ####
-feats = np.load('data/features/resnet18-rnk-lm-da_ox.npy')
-dataset.vis_top(feats, q_idx) 
+# This model has been trained the following data augmentation:
+# cropping, pixel jittering, rotation, tilting
+dfeats = np.load(models['resnet18-rnk-lm-gem-da']['dataset'])
+qfeats = np.load(models['resnet18-rnk-lm-gem-da']['queries'])
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
 
-do_tsne(feats, labels, classes, sec='1g')
+do_tsne(dfeats, labels, classes, sec='1g')
 
 
 
 
 #### 1h: Multi-resolution ####
-feats = np.load('data/features/resnet18-rnk-lm-da_mr_ox.npy')
-dataset.vis_top(feats, q_idx) 
+dfeats = np.load(models['resnet18-rnk-lm-gem-da-mr']['dataset'])
+qfeats = np.load(models['resnet18-rnk-lm-gem-da-mr']['queries'])
+dataset.vis_top(dfeats, q_idx, q_feat=qfeats[qidx])
 
-do_tsne(feats, labels, classes, sec='1g')
+do_tsne(dfeats, labels, classes, sec='1g')
 
 
 
@@ -226,7 +242,7 @@ dataset.pq_train(feats_train, m, n_bits)
 dataset.pq_add(feats)
 
 # search:
-dataset.vis_top(feats, q_idx, pq_flag=True) 
+dataset.vis_top(feats, q_idx, pq_flag=True)
 # Q1: How much memory (in bytes) is needed to store the compressed representation?
 # Q2: What is the compression ratio?
 # Q3: How did the compression affect the retrieval results?
@@ -259,7 +275,7 @@ dataset.vis_top(feats, q_idx, dfs='it:int20')
 # Q1: The affinity matrix is computed using the similarity measure s = <f_i, f_j>^alpha, where 0 < alpha <= 1.0. Use dfs='alpha:float<alpha>' for different values of alpha. What is the impact of changing it? E.g:
 dataset.vis_top(feats, q_idx, dfs='alpha:float0.8')
 
-# Q2: k_q is the number of database items to use for diffusion. Use dfs='ks:100-<k_q>' for different values of k_q. What is the impact of changing it? E.g: 
+# Q2: k_q is the number of database items to use for diffusion. Use dfs='ks:100-<k_q>' for different values of k_q. What is the impact of changing it? E.g:
 dataset.vis_top(feats, q_idx, dfs='ks:100-5')
 
 # Q3: trunc is the number of sub-rows and columns to use for diffusion. Use dfs='trunc:int<trunc>' for different values of trunc. What is the impact of changing it? E.g:
