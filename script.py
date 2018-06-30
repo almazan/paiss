@@ -191,7 +191,7 @@ do_tsne(dfeats, labels, classes, sec='1g')
 #######################################
 
 q_idx = 0
-feats = np.load('data/features/resnet50-rnk-lm-da_ox.npy')
+dfeats = np.load(models['resnet50-rnk-lm-gem-da']['dataset'])
 
 # load models:
 model1 = resnet50_rank()
@@ -204,37 +204,37 @@ model2.eval()
 
 # evaluate model for query
 q_feat = q_eval(model1, dataset, q_idx)
-dataset.vis_top(feats, q_idx, q_feat)
+dataset.vis_top(dfeats, q_idx, q_feat)
 
 
 #### Section 2a: Robustness to input transformations
 
 q_feat = q_eval(model1, dataset, q_idx, flip=True)
-dataset.vis_top(feats, q_idx, q_feat)
+dataset.vis_top(dfeats, q_idx, q_feat)
 # Q1: What is the impact of flipping the query image?
 
 q_feat1 = q_eval(model1, dataset, q_idx, rotate=5.)
-dataset.vis_top(feats, q_idx, q_feat1)
+dataset.vis_top(dfeats, q_idx, q_feat1)
 
 q_feat2 = q_eval(model2, dataset, q_idx, rotate=5.)
-dataset.vis_top(feats, q_idx, q_feat2)
+dataset.vis_top(dfeats, q_idx, q_feat2)
 # Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable? How does the models (model1 trained without image rotation, model2 trained with) compare?
 
 
 #### Section 2b: Queries with multi-scale features
 
-q_feat = q_eval(model, dataset, q_idx, scales=1)
-dataset.vis_top(feats, q_idx, q_feat)
+q_feat = q_eval(model1, dataset, q_idx, scales=1)
+dataset.vis_top(dfeats, q_idx, q_feat)
 
-q_feat = q_eval(model, dataset, q_idx, scales=2)
-dataset.vis_top(feats, q_idx, q_feat)
+q_feat = q_eval(model1, dataset, q_idx, scales=2)
+dataset.vis_top(dfeats, q_idx, q_feat)
 # Q: What is the impact of using more scales?
 
 
 #### Section 2c: Robustness to resolution changes
 
-q_feat = q_eval(model, dataset, q_idx, resize=1.5)
-dataset.vis_top(feats, q_idx, q_feat)
+q_feat = q_eval(model1, dataset, q_idx, resize=1.5)
+dataset.vis_top(dfeats, q_idx, q_feat)
 # Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
 
 
