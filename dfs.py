@@ -149,7 +149,7 @@ def reg_diffusion(q_feat, d_feats, dargs='', out_dir='.'):
         f = dfs(A,y,dargs['tol'],dargs['it']).T
     else:
         # sub-index for truncation
-        sub = get_knn(d_feats, q_feats[np.newaxis,], topn, dim=0)[1].squeeze().tolist()
+        sub = get_knn(d_feats, q_feat[np.newaxis,], topn, dim=0)[1].squeeze().tolist()
 
         # truncated Laplacian
         Asub = A_[sub,:].tocsc()[:,sub].tocsr()

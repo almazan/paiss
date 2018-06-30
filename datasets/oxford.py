@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 if os.name != 'nt': import faiss
 
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" # OMP issue described here: https://github.com/dmlc/xgboost/issues/1715
+
 from .dataset import Dataset
 from dfs import reg_diffusion
 
@@ -78,13 +80,15 @@ class Oxford(Dataset):
         if pq_flag:
             # perform AQE?
             if nqe > 0:
-                D, idx = self.pq_search(q_feat, k=nqe)
-                q_aug = np.vstack([feats[j] * np.exp(-D[j])**aqe for j in idx])
-                q_aug = np.mean(np.vstack((q_feat, q_aug)), axis=0)
-                q_aug = q_aug / np.linalg.norm(q_aug)
-                _, idx = self.pq_search(q_aug, k=topk+1)
+                _, idx = self.pq_search(q_feat, k=nqe)
+                idx    = idx[0]
+                q_aug  = np.vstack([feats[j] * np.exp(-D[j])**aqe for j in idx])
+                q_aug  = np.mean(np.vstack((q_feat, q_aug)), axis=0)
+                q_aug  = q_aug / np.linalg.norm(q_aug)
+                _, idx = self.pq_search(q_aug, k=self.N_images)
             else:
-                _, idx = self.pq_search(q_feat, k=topk+1)
+                _, idx = self.pq_search(q_feat, k=self.N_images)
+            idx = idx[0]
         else:
             sim = np.dot(q_feat, feats.T)
 
