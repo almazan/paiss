@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 if os.name != 'nt': import faiss
 
 from .dataset import Dataset
-
+from dfs import reg_diffusion
 
 class Oxford(Dataset):
     def __init__(self, dataset_name='Oxford'):
@@ -70,10 +70,11 @@ class Oxford(Dataset):
     def get_query_roi(self, i):
         return self.__q_roi[self.__q_names[i]]
 
-    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, out_image_file=None):
+    def vis_top(self, feats, q_idx, q_feat=None, topk=10, nqe=0, aqe=0.0, pq_flag=False, dfs='', out_image_file=None):
         q_name = self.__q_names[q_idx]
         q_idx = self.__q_index[q_idx]
         if q_feat is None: q_feat = feats[q_idx]
+
         if pq_flag:
             # perform AQE?
             if nqe > 0:
@@ -92,8 +93,16 @@ class Oxford(Dataset):
                 idx   = np.argpartition(sim, -nqe)[-nqe:]
                 q_aug = np.vstack([feats[j] * sim[j]**aqe for j in idx])
                 q_aug = np.mean(np.vstack((q_feat, q_aug)), axis=0)
-                q_aug = q_aug / np.linalg.norm(q_aug)
-                sim   = np.dot(q_aug, feats.T)
+                q_f   = q_aug / np.linalg.norm(q_aug)
+            else:
+                q_f   = q_feat
+
+            # perform diffusion?
+            if dfs:
+                sim = reg_diffusion(q_f, feats, dfs)
+            else:
+                sim = np.dot(q_f, feats.T)
+
             idx = np.argsort(sim)[::-1]
 
         ap = self.get_ap(q_name, idx)
