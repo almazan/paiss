@@ -56,16 +56,19 @@ with open('data/models.json', 'r') as fp:
     models_dict = json.load(fp)
 
 # load the necessary models and data
-if args.sect.startswith('2'):
-    dfeats = np.load(models_dict['resnet50-rnk-lm-gem-da']['dataset'])
-
 if args.sect in ['2a', '2b', '2c']:
     # load models:
     model1 = resnet50_rank()
-    model2 = resnet50_rank_DA()
-
     model1.eval()
+    model2 = resnet50_rank_DA()
     model2.eval()
+
+if args.sect.startswith('2'):
+    dfeats1 = np.load(models_dict['resnet50-rnk-lm-gem']['dataset'])
+    qfeats1 = np.load(models_dict['resnet50-rnk-lm-gem']['queries'])
+    dfeats2 = np.load(models_dict['resnet50-rnk-lm-gem-da']['dataset'])
+    qfeats2 = np.load(models_dict['resnet50-rnk-lm-gem-da']['queries'])
+
 
 if args.qidx is not None and args.qidx > 54:
     print ('Incorrect query index. Please choose an id from 0 to 54. Exiting...')
@@ -258,18 +261,25 @@ elif args.sect == '2a':
     #### Section 2a: Robustness to input transformations
     q_idx = args.qidx if args.qidx is not None else 0
 
-    q_feat = q_eval(model1, dataset, q_idx)
-    dataset.vis_top(dfeats, q_idx, q_feat)
+    q_feat1 = q_eval(model1, dataset, q_idx)
+    dataset.vis_top(dfeats1, q_idx, q_feat1)
 
-    q_feat = q_eval(model1, dataset, q_idx, flip=True)
-    dataset.vis_top(dfeats, q_idx, q_feat)
+    # Flipping the query image
+    q_feat1_flip = q_eval(model1, dataset, q_idx, flip=True)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_flip)
     # Q1: What is the impact of flipping the query image?
 
-    q_feat1 = q_eval(model1, dataset, q_idx, rotate=5.)
-    dataset.vis_top(dfeats, q_idx, q_feat1)
+    # Standard trick: aggregate both no-flipped and flipped representations
+    q_feat1_new = (q_feat1 + q_feat1_flip)
+    q_feat1_new = q_feat1_new / norm(q_feat1_new) # Don't forget to l2-normalize again :)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_new)
 
-    q_feat2 = q_eval(model2, dataset, q_idx, rotate=5.)
-    dataset.vis_top(dfeats, q_idx, q_feat2)
+    # Rotating the query image
+    q_feat1_rot = q_eval(model1, dataset, q_idx, rotate=5.)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_rot)
+
+    q_feat2_rot = q_eval(model2, dataset, q_idx, rotate=5.)
+    dataset.vis_top(dfeats2, q_idx, q_feat2_rot)
     # Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable? How does the models (model1 trained without image rotation, model2 trained with) compare?
 
 
@@ -277,11 +287,13 @@ elif args.sect == '2b':
     #### Section 2b: Queries with multi-scale features
     q_idx = args.qidx if args.qidx is not None else 0
 
-    q_feat = q_eval(model1, dataset, q_idx, scales=1)
-    dataset.vis_top(dfeats, q_idx, q_feat)
+    # Extract features using a single input scale: 800px
+    q_feat = q_eval(model1, dataset, q_idx)
+    dataset.vis_top(dfeats1, q_idx, q_feat)
 
-    q_feat = q_eval(model1, dataset, q_idx, scales=2)
-    dataset.vis_top(dfeats, q_idx, q_feat)
+    # Aggregate features extracted at several input sizes: [600, 800, 1000, 1200]
+    q_feat_mr = q_eval(model1, dataset, q_idx, scale=2)
+    dataset.vis_top(dfeats1, q_idx, q_feat_mr)
     # Q: What is the impact of using more scales?
 
 
@@ -289,15 +301,16 @@ elif args.sect == '2c':
     #### Section 2c: Robustness to resolution changes
     q_idx = args.qidx if args.qidx is not None else 0
 
-    q_feat = q_eval(model1, dataset, q_idx, resize=1.5)
-    dataset.vis_top(dfeats, q_idx, q_feat)
+    # Extract features using a larger input scale: 1200px
+    q_feat = q_eval(model1, dataset, q_idx, scale=1.5)
+    dataset.vis_top(dfeats1, q_idx, q_feat)
     # Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
 
 
 elif args.sect == '2d':
     ## Subsection 2d: Robustness to compression (using PQ)
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, ap_flag=True)
 
     m = 256      # number of subquantizers
     n_bits = 8   # bits allocated per subquantizer
@@ -309,7 +322,7 @@ elif args.sect == '2d':
     dataset.pq_add(feats)
 
     # search:
-    dataset.vis_top(dfeats, q_idx, pq_flag=True, ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, pq_flag=True, ap_flag=True)
     # Q1: How much memory (in bytes) is needed to store the compressed representation?
     # Q2: What is the compression ratio?
     # Q3: How did the compression affect the retrieval results?
@@ -319,7 +332,7 @@ elif args.sect == '2e':
     ## Subsection 2e: Average query expansion
     q_idx = args.qidx if args.qidx is not None else 0
 
-    dataset.vis_top(dfeats, q_idx, nqe=3, ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], nqe=3, ap_flag=True)
     # nqe is the number of database items with which to expand the query.
     # Q1: What is the impact of using different values of nqe?
 
@@ -327,7 +340,7 @@ elif args.sect == '2f':
     ## Subsection 2f: alpha query expansion
     q_idx = args.qidx if args.qidx is not None else 0
 
-    dataset.vis_top(dfeats, q_idx, nqe=5, aqe=3.0, ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], nqe=5, aqe=3.0, ap_flag=True)
     # aqe is the value of alpha applied for alpha query expansion.
     # Q1: How should nqe be chosen? Hint: What is the impact of low prec@K (where K is equivalent to nqe) on aqe?
     # Q2: What is the impact of using different values of nqe, aqe?
@@ -336,19 +349,19 @@ elif args.sect == '2g':
     ## Subsection 2g: Diffusion
     q_idx = args.qidx if args.qidx is not None else 0
 
-    dataset.vis_top(dfeats, q_idx, dfs='it:int20', ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], dfs='it:int20', ap_flag=True)
     # Parameters for dfs are passed as strings with datatypes indicated. The default parameter string is:
     #    'alpha:float0.99_it:int20_tol:float1e-6_gamma:float3_ks:100-30_trunc:bool_bsize:int100000_fsr:bool_IS:bool_wgt:bool_bs:bool_reg:bool_split:int0_gmp:bool'
     #    strings passed to the dfs parameter overwrite the default parameters
 
     # Q1: The affinity matrix is computed using the similarity measure s = <f_i, f_j>^alpha, where 0 < alpha <= 1.0. Use dfs='alpha:float<alpha>' for different values of alpha. What is the impact of changing it? E.g:
-    dataset.vis_top(dfeats, q_idx, dfs='alpha:float0.8', ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], dfs='alpha:float0.8', ap_flag=True)
 
     # Q2: k_q is the number of database items to use for diffusion. Use dfs='ks:100-<k_q>' for different values of k_q. What is the impact of changing it? E.g:
-    dataset.vis_top(dfeats, q_idx, dfs='ks:100-5', ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], dfs='ks:100-5', ap_flag=True)
 
     # Q3: trunc is the number of sub-rows and columns to use for diffusion. Use dfs='trunc:int<trunc>' for different values of trunc. What is the impact of changing it? E.g:
-    dataset.vis_top(dfeats, q_idx, dfs='trunc:int2000', ap_flag=True)
+    dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], dfs='trunc:int2000', ap_flag=True)
     # Q4: What is the maximum value of trunc and what case does it generalize to?
 
 else:

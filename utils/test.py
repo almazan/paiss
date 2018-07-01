@@ -45,6 +45,7 @@ def q_eval(net, dataset, q_idx, flip=False, rotate=False, scale=1):
 
     net = net.eval()
     q_feat = torch.zeros( (len(trfs_chains), net.out_features) )
+    print ('Computing the forward pass and extracting the image representation...')
     for i in range(len(trfs_chains)):
         q_tensor = Compose(trfs_chains[i])(q_im)
         q_feat[i] = net.forward(q_tensor.view(1,q_tensor.shape[0],q_tensor.shape[1],q_tensor.shape[2]))
