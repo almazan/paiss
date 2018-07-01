@@ -365,4 +365,4 @@ elif args.sect == '2g':
     # Q4: What is the maximum value of trunc and what case does it generalize to?
 
 else:
-    print ('Incorrect section name. Please choose a section between 1[a-i] or 2[a-g]. Example: python script.py --sect 1c')
+    print ('Incorrect section name. Please choose a section between 1[a-i] or 2[a-g]. Example: python session.py --sect 1c')
