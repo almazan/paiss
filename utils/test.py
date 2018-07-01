@@ -3,6 +3,32 @@ import torch
 from math import floor
 import torch.nn.functional as F
 from torchvision.transforms import ToTensor, Normalize, Resize, RandomHorizontalFlip, RandomRotation, Compose
+import utils.transforms as trf
+from PIL import Image
+
+def extract_query(net, dataset, q_idx, scale=800, crop=True, flip=None, rotate=None):
+    # Load query image
+    img = Image.open(dataset.get_query_filename(q_idx))
+    # Crop the query ROI
+    if crop:
+        img = img.crop(tuple(dataset.get_query_roi(q_idx)))
+    # Apply transformations
+    img = trf.resize_image(img, scale)
+    # Flip
+    if flip: img = trf.flip_image(img, flip)
+    # Rotation
+    if rotate: img = trf.rotate(img, rotate)
+    # Convert to Pytorch's tensor and normalize
+    I = trf.to_tensor(img)
+    I = trf.normalize(I, dict(rgb_means=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+    I = I.unsqueeze(0)#.to(device)
+
+    # Forward pass to extract the features
+    with torch.no_grad():
+        print ('Extracting the representation of the query...')
+        q_feat = net(I).cpu().numpy()
+
+    return q_feat, img
 
 def q_eval(net, dataset, q_idx, flip=False, rotate=False, scale=1):
     # load query image
@@ -48,6 +74,7 @@ def q_eval(net, dataset, q_idx, flip=False, rotate=False, scale=1):
     print ('Computing the forward pass and extracting the image representation...')
     for i in range(len(trfs_chains)):
         q_tensor = Compose(trfs_chains[i])(q_im)
+        import pdb; pdb.set_trace()  # XXX BREAKPOINT
         q_feat[i] = net.forward(q_tensor.view(1,q_tensor.shape[0],q_tensor.shape[1],q_tensor.shape[2]))
     return F.normalize(q_feat.mean(dim=0), dim=0).detach().numpy()
 

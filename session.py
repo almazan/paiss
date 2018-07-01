@@ -17,7 +17,7 @@ import os.path as osp
 
 from datasets import create
 from archs import *
-from utils.test import q_eval
+from utils.test import extract_query
 from utils.tsne import do_tsne
 
 import argparse
@@ -65,6 +65,9 @@ if args.sect not in sections:
 
 # Default query indexes for each section
 preselected_queries = {e:0 for e in sections}
+preselected_queries['2a'] = 42
+preselected_queries['2b'] = 42
+preselected_queries['2c'] = 7
 
 q_idx = args.qidx if args.qidx is not None else preselected_queries[args.sect]
 
@@ -272,48 +275,59 @@ elif args.sect == '1i':
 elif args.sect == '2a':
     #### Section 2a: Robustness to input transformations
 
-    q_feat1 = q_eval(model1, dataset, q_idx)
-    dataset.vis_top(dfeats1, q_idx, q_feat1, ap_flag=True)
+    print ('\nOriginal image')
+    q_feat1, raw_img = extract_query(model1, dataset, q_idx)
+    dataset.vis_top(dfeats1, q_idx, q_feat1, ap_flag=True, query_image=raw_img)
 
     # Flipping the query image
-    q_feat1_flip = q_eval(model1, dataset, q_idx, flip=True)
-    dataset.vis_top(dfeats1, q_idx, q_feat1_flip, ap_flag=True)
+    print ('\nFlipped image')
+    q_feat1_flip, raw_img = extract_query(model1, dataset, q_idx, flip=True)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_flip, ap_flag=True, query_image=raw_img)
     # Q1: What is the impact of flipping the query image?
 
     # Standard trick: aggregate both no-flipped and flipped representations
+    print ('\nOriginal + flipped image')
     q_feat1_new = (q_feat1 + q_feat1_flip)
     q_feat1_new = q_feat1_new / norm(q_feat1_new) # Don't forget to l2-normalize again :)
     dataset.vis_top(dfeats1, q_idx, q_feat1_new, ap_flag=True)
 
     # Rotating the query image
-    q_feat1_rot = q_eval(model1, dataset, q_idx, rotate=5.)
-    dataset.vis_top(dfeats1, q_idx, q_feat1_rot, ap_flag=True)
+    print ('\nRotated image with vanilla model')
+    q_feat1_rot, raw_img = extract_query(model1, dataset, q_idx, rotate=10.)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_rot, ap_flag=True, query_image=raw_img)
 
-    q_feat2_rot = q_eval(model2, dataset, q_idx, rotate=5.)
-    dataset.vis_top(dfeats2, q_idx, q_feat2_rot, ap_flag=True)
+    print ('\nRotated image with augmented model')
+    q_feat2_rot, raw_img = extract_query(model2, dataset, q_idx, rotate=10.)
+    dataset.vis_top(dfeats2, q_idx, q_feat2_rot, ap_flag=True, query_image=raw_img)
     # Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable? How does the models (model1 trained without image rotation, model2 trained with) compare?
 
 
 elif args.sect == '2b':
-    #### Section 2b: Queries with multi-scale features
+    #### Section 2b: Robustness to resolution changes
 
-    # Extract features using a single input scale: 800px
-    q_feat = q_eval(model1, dataset, q_idx)
-    dataset.vis_top(dfeats1, q_idx, q_feat, ap_flag=True)
-
-    # Aggregate features extracted at several input sizes: [600, 800, 1000, 1200]
-    q_feat_mr = q_eval(model1, dataset, q_idx, scale=2)
-    dataset.vis_top(dfeats1, q_idx, q_feat_mr, ap_flag=True)
-    # Q: What is the impact of using more scales?
+    # Extract features using a larger input scale: 1200px
+    q_feat, raw_img = extract_query(model2, dataset, q_idx, scale=1200)
+    dataset.vis_top(dfeats2, q_idx, q_feat, ap_flag=True, query_image=raw_img, out_image_file=out_image)
+    # Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
 
 
 elif args.sect == '2c':
-    #### Section 2c: Robustness to resolution changes
+    #### Section 2c: Queries with multi-scale features
 
-    # Extract features using a larger input scale: 1200px
-    q_feat = q_eval(model1, dataset, q_idx, scale=1.5)
-    dataset.vis_top(dfeats1, q_idx, q_feat, ap_flag=True, out_image_file=out_image)
-    # Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
+    # Extract features using a single input scale: 800px
+    q_feat, raw_img = extract_query(model1, dataset, q_idx, scale=800)
+    dataset.vis_top(dfeats1, q_idx, q_feat, ap_flag=True, query_image=raw_img)
+
+    # Aggregate features extracted at several input sizes: [600, 800, 1000, 1200]
+    features = [q_feat]
+    for scale in [600, 1000, 1200]:
+        q_feat, raw_img = extract_query(model1, dataset, q_idx, scale=scale)
+        features.append(q_feat)
+    q_feat_mr = np.mean(np.vstack(features), axis=0)
+    # L2 normalize again
+    q_feat_mr = q_feat_mr / norm(q_feat_mr)
+    dataset.vis_top(dfeats1, q_idx, q_feat_mr, ap_flag=True, query_image=raw_img)
+    # Q: What is the impact of using more scales?
 
 
 elif args.sect == '2d':
@@ -324,10 +338,12 @@ elif args.sect == '2d':
     n_bits = 8   # bits allocated per subquantizer
 
     feats_train = np.load(models_dict['resnet50-rnk-lm-gem-da']['training'])
+    print ('Training K-means for PQ...')
     dataset.pq_train(feats_train, m, n_bits)
 
     # dataset to encode
-    dataset.pq_add(feats)
+    print ('Encoding features...')
+    dataset.pq_add(dfeats2)
 
     # search:
     dataset.vis_top(dfeats2, q_idx, pq_flag=True, ap_flag=True)
