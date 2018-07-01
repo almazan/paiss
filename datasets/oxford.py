@@ -140,6 +140,8 @@ class Oxford(Dataset):
         plt.show()
         input("Showing the top-{} results. Press Enter to continue...".format(topk))
         if out_image_file is not None:
+            if not os.path.exists(os.path.dirname(out_image_file)):
+                os.makedirs(os.path.dirname(out_image_file))
             plt.savefig(out_image_file)
         plt.close()
 

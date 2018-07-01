@@ -13,6 +13,7 @@ from torch import nn
 import json
 import pdb
 import sys
+import os.path as osp
 
 from datasets import create
 from archs import *
@@ -55,6 +56,25 @@ classes = dataset.get_label_names()
 with open('data/models.json', 'r') as fp:
     models_dict = json.load(fp)
 
+sections = ['1a', '1b', '1c', '1d', '1e', '1f', '1g', '1h', '1i',
+            '2a', '2b', '2c', '2d', '2e', '2f', '2g']
+
+if args.sect not in sections:
+    print ('Incorrect section name. Please choose a section between 1[a-i] or 2[a-g]. Example: python session.py --sect 1c')
+    sys.exit()
+
+# Default query indexes for each section
+preselected_queries = {e:0 for e in sections}
+
+q_idx = args.qidx if args.qidx is not None else preselected_queries[args.sect]
+
+if args.qidx is not None and args.qidx > 54:
+    print ('Incorrect query index. Please choose an id from 0 to 54. Exiting...')
+    sys.exit()
+
+# Output image
+out_image = 'results/sect{}_qidx{}.png'.format(args.sect, q_idx)
+
 # load the necessary models and data
 if args.sect in ['2a', '2b', '2c']:
     # load models:
@@ -69,10 +89,6 @@ if args.sect.startswith('2'):
     dfeats2 = np.load(models_dict['resnet50-rnk-lm-gem-da']['dataset'])
     qfeats2 = np.load(models_dict['resnet50-rnk-lm-gem-da']['queries'])
 
-
-if args.qidx is not None and args.qidx > 54:
-    print ('Incorrect query index. Please choose an id from 0 to 54. Exiting...')
-    sys.exit()
 
 print('Running section {}\n'.format(args.sect))
 
@@ -99,9 +115,7 @@ elif args.sect == '1a':
     # model_1a_test = alexnet_imagenet_fc7(); print(model_1a_test)
 
     # visualize top results for a given query
-    q_idx = args.qidx if args.qidx is not None else 0
-
-    dataset.vis_top(dfeats, q_idx, ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         # run t-SNE
@@ -120,8 +134,7 @@ elif args.sect == '1b':
 
     dfeats = np.load(models_dict['alexnet-cls-lm-fc7']['dataset'])
     qfeats = np.load(models_dict['alexnet-cls-lm-fc7']['queries'])
-    q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         # run t-SNE
@@ -146,8 +159,7 @@ elif args.sect == '1c':
     print(dfeats.shape)
     input("Check session.py. Press Enter to continue...")
     # Q: Why does the size of the feature representation changes? Why does the size of the feature representation is important for a image retrieval task?
-    q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1c')
@@ -174,8 +186,7 @@ elif args.sect == '1d':
     print(norm(dfeats[:10], axis=1))
     print(dfeats.shape)
     # visualize top results for a given query index
-    q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1d')
@@ -193,7 +204,7 @@ elif args.sect == '1e':
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1e-1')
         # run t-SNE including unlabeled images
-        do_tsne(dfeats, labels, classes, sec='1e-2', show_unlabeled=True)
+        do_tsne(dfeats, labels, classes, sec='1e-2', show_unlabeled=True, out_image_file=out_image)
         # Q: What can we say about the separation of data when included unlabeled images? And the distribution of the unlabeled features? How can we train a model to separate labeled from unlabeled data?
 
 
@@ -207,11 +218,10 @@ elif args.sect == '1f':
 
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem']['queries'])
-    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1f-1')
-        do_tsne(dfeats, labels, classes, sec='1f-2', show_unlabeled=True)
+        do_tsne(dfeats, labels, classes, sec='1f-2', show_unlabeled=True, out_image_file=out_image)
         # Q: Compare the plots with unlabeled data of the model trained for retrieval (with triplet loss) and the model trained for classification of the previous subsection. How does it change?
 
 
@@ -223,8 +233,7 @@ elif args.sect == '1g':
     # cropping, pixel jittering, rotation, tilting
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem-da']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem-da']['queries'])
-    q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1g')
@@ -237,8 +246,7 @@ elif args.sect == '1h':
     # different resolutions and average the outputs
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem-da-mr']['queries'])
-    q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1h')
@@ -251,8 +259,7 @@ elif args.sect == '1i':
     # Finally, we upgrade the backbone architecture to Resnet50
     dfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['queries'])
-    q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1i')
@@ -264,7 +271,6 @@ elif args.sect == '1i':
 #######################################
 elif args.sect == '2a':
     #### Section 2a: Robustness to input transformations
-    q_idx = args.qidx if args.qidx is not None else 0
 
     q_feat1 = q_eval(model1, dataset, q_idx)
     dataset.vis_top(dfeats1, q_idx, q_feat1, ap_flag=True)
@@ -290,7 +296,6 @@ elif args.sect == '2a':
 
 elif args.sect == '2b':
     #### Section 2b: Queries with multi-scale features
-    q_idx = args.qidx if args.qidx is not None else 0
 
     # Extract features using a single input scale: 800px
     q_feat = q_eval(model1, dataset, q_idx)
@@ -304,17 +309,15 @@ elif args.sect == '2b':
 
 elif args.sect == '2c':
     #### Section 2c: Robustness to resolution changes
-    q_idx = args.qidx if args.qidx is not None else 0
 
     # Extract features using a larger input scale: 1200px
     q_feat = q_eval(model1, dataset, q_idx, scale=1.5)
-    dataset.vis_top(dfeats1, q_idx, q_feat, ap_flag=True)
+    dataset.vis_top(dfeats1, q_idx, q_feat, ap_flag=True, out_image_file=out_image)
     # Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
 
 
 elif args.sect == '2d':
     ## Subsection 2d: Robustness to compression (using PQ)
-    q_idx = args.qidx if args.qidx is not None else 0
     dataset.vis_top(dfeats2, q_idx, ap_flag=True)
 
     m = 256      # number of subquantizers
@@ -335,7 +338,6 @@ elif args.sect == '2d':
 
 elif args.sect == '2e':
     ## Subsection 2e: Average query expansion
-    q_idx = args.qidx if args.qidx is not None else 0
 
     dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], nqe=3, ap_flag=True)
     # nqe is the number of database items with which to expand the query.
@@ -343,7 +345,6 @@ elif args.sect == '2e':
 
 elif args.sect == '2f':
     ## Subsection 2f: alpha query expansion
-    q_idx = args.qidx if args.qidx is not None else 0
 
     dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], nqe=5, aqe=3.0, ap_flag=True)
     # aqe is the value of alpha applied for alpha query expansion.
@@ -352,7 +353,6 @@ elif args.sect == '2f':
 
 elif args.sect == '2g':
     ## Subsection 2g: Diffusion
-    q_idx = args.qidx if args.qidx is not None else 0
 
     dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], dfs='it:int20', ap_flag=True)
     # Parameters for dfs are passed as strings with datatypes indicated. The default parameter string is:
@@ -369,5 +369,3 @@ elif args.sect == '2g':
     dataset.vis_top(dfeats2, q_idx, q_feat=qfeats2[q_idx], dfs='trunc:int2000', ap_flag=True)
     # Q4: What is the maximum value of trunc and what case does it generalize to?
 
-else:
-    print ('Incorrect section name. Please choose a section between 1[a-i] or 2[a-g]. Example: python session.py --sect 1c')
