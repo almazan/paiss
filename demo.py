@@ -46,7 +46,7 @@ def demo(args):
     # Forward pass to extract the features
     with torch.no_grad():
         print ('Extracting the representation of the query...')
-        q_feat = model(I).numpy()
+        q_feat = model(I).cpu().numpy()
     print ('Done\n')
 
     # Rank the database and visualize the top-k most similar images in the database
