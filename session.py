@@ -87,11 +87,13 @@ elif args.sect == '1a':
     #### 1a: AlexNet architecture ####
     model_1a = alexnet_imagenet()
     print(model_1a)
+    input("Check session.py. Press Enter to continue...")
     # Q: The original AlexNet model is trained for classification on ImageNet dataset, that contains 1000 image classes. What is the number of dimensions of the output of the model? What does each dimension represents?
 
     dfeats = np.load(models_dict['alexnet-cls-imagenet-fc7']['dataset'])
     print(norm(dfeats[:10], axis=1))
     print(dfeats.shape)
+    input("Check session.py. Press Enter to continue...")
     # Q: What does each line of the matrix feats represent? Where does the dimension of these lines comes from and how do we extract these features?
     # Hint: uncomment and run the following command
     # model_1a_test = alexnet_imagenet_fc7(); print(model_1a_test)
@@ -99,7 +101,7 @@ elif args.sect == '1a':
     # visualize top results for a given query
     q_idx = args.qidx if args.qidx is not None else 0
 
-    dataset.vis_top(dfeats, q_idx)
+    dataset.vis_top(dfeats, q_idx, aq_flag=True)
 
     if args.show_tsne:
         # run t-SNE
@@ -113,12 +115,13 @@ elif args.sect == '1b':
     #### 1b: Finetuning on Landmarks ####
     model_1b = alexnet_lm()
     print(model_1b)
+    input("Check session.py. Press Enter to continue...")
     # Q: Why do we change the last layer of the AlexNet architecture? How do we initialize the layers of model_1b for finetuning?
 
     dfeats = np.load(models_dict['alexnet-cls-lm-fc7']['dataset'])
     qfeats = np.load(models_dict['alexnet-cls-lm-fc7']['queries'])
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
 
     if args.show_tsne:
         # run t-SNE
@@ -135,14 +138,16 @@ elif args.sect == '1c':
     #### 1c: Generalized Mean Pooling (GeM) ####
     model_1c = alexnet_GeM()
     print(model_1c)
+    input("Check session.py. Press Enter to continue...")
     # Q: For this model, we remove all fully connected layers (classifier layers) and replace the last max pooling layer by an aggregation pooling layer (more details about this layer in the next subsection)
 
     dfeats = np.load(models_dict['alexnet-cls-lm-gem']['dataset'])
     qfeats = np.load(models_dict['alexnet-cls-lm-gem']['queries'])
     print(dfeats.shape)
+    input("Check session.py. Press Enter to continue...")
     # Q: Why does the size of the feature representation changes? Why does the size of the feature representation is important for a image retrieval task?
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1c')
@@ -157,6 +162,7 @@ elif args.sect == '1d':
     model_1d = resnet18_GeM()
     print(model_0.adpool)
     print(model_1d.adpool)
+    input("Check session.py. Press Enter to continue...")
     # Q: Why do we change the average pooling layer of the original Resnet18
     # architecture for a generalized mean pooling? What operation is the layer
     # model_1d.adpool doing?
@@ -169,7 +175,7 @@ elif args.sect == '1d':
     print(dfeats.shape)
     # visualize top results for a given query index
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1d')
@@ -202,7 +208,7 @@ elif args.sect == '1f':
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem']['queries'])
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1f-1')
         do_tsne(dfeats, labels, classes, sec='1f-2', show_unlabeled=True)
@@ -218,7 +224,7 @@ elif args.sect == '1g':
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem-da']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem-da']['queries'])
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1g')
@@ -233,7 +239,7 @@ elif args.sect == '1h':
     dfeats = np.load(models_dict['resnet18-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet18-rnk-lm-gem-da-mr']['queries'])
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1h')
@@ -247,7 +253,7 @@ elif args.sect == '1i':
     dfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['queries'])
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], aq_flag=True)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1i')
@@ -262,24 +268,24 @@ elif args.sect == '2a':
     q_idx = args.qidx if args.qidx is not None else 0
 
     q_feat1 = q_eval(model1, dataset, q_idx)
-    dataset.vis_top(dfeats1, q_idx, q_feat1)
+    dataset.vis_top(dfeats1, q_idx, q_feat1, aq_flag=True)
 
     # Flipping the query image
     q_feat1_flip = q_eval(model1, dataset, q_idx, flip=True)
-    dataset.vis_top(dfeats1, q_idx, q_feat1_flip)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_flip, aq_flag=True)
     # Q1: What is the impact of flipping the query image?
 
     # Standard trick: aggregate both no-flipped and flipped representations
     q_feat1_new = (q_feat1 + q_feat1_flip)
     q_feat1_new = q_feat1_new / norm(q_feat1_new) # Don't forget to l2-normalize again :)
-    dataset.vis_top(dfeats1, q_idx, q_feat1_new)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_new, aq_flag=True)
 
     # Rotating the query image
     q_feat1_rot = q_eval(model1, dataset, q_idx, rotate=5.)
-    dataset.vis_top(dfeats1, q_idx, q_feat1_rot)
+    dataset.vis_top(dfeats1, q_idx, q_feat1_rot, aq_flag=True)
 
     q_feat2_rot = q_eval(model2, dataset, q_idx, rotate=5.)
-    dataset.vis_top(dfeats2, q_idx, q_feat2_rot)
+    dataset.vis_top(dfeats2, q_idx, q_feat2_rot, aq_flag=True)
     # Q2: Change the rotation value (in +/- degrees). What is the impact of rotating it? Up to which degree of rotation is the result stable? How does the models (model1 trained without image rotation, model2 trained with) compare?
 
 
@@ -289,11 +295,11 @@ elif args.sect == '2b':
 
     # Extract features using a single input scale: 800px
     q_feat = q_eval(model1, dataset, q_idx)
-    dataset.vis_top(dfeats1, q_idx, q_feat)
+    dataset.vis_top(dfeats1, q_idx, q_feat, aq_flag=True)
 
     # Aggregate features extracted at several input sizes: [600, 800, 1000, 1200]
     q_feat_mr = q_eval(model1, dataset, q_idx, scale=2)
-    dataset.vis_top(dfeats1, q_idx, q_feat_mr)
+    dataset.vis_top(dfeats1, q_idx, q_feat_mr, aq_flag=True)
     # Q: What is the impact of using more scales?
 
 
@@ -303,7 +309,7 @@ elif args.sect == '2c':
 
     # Extract features using a larger input scale: 1200px
     q_feat = q_eval(model1, dataset, q_idx, scale=1.5)
-    dataset.vis_top(dfeats1, q_idx, q_feat)
+    dataset.vis_top(dfeats1, q_idx, q_feat, aq_flag=True)
     # Q: Resize the image by a factor. What is the impact of resizing it, especially to very low resolution?
 
 
