@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description='Demo')
 
 parser.add_argument('--sect', type=str, default='init', required=False, help='Selects the section to run')
 parser.add_argument('--qidx', type=int, required=False, help='Query index')
-parser.add_argument('--hide_tsne', dest='show_tsne', action='store_false', default=True, help='Skips the TSNE computation')
+parser.add_argument('--hide-tsne', dest='show_tsne', action='store_false', default=True, help='Skips the TSNE computation')
 args = parser.parse_args()
 
 np.random.seed(0)
@@ -232,7 +232,6 @@ elif args.sect == '1g':
 
 
 elif args.sect == '1h':
-    print('HOLA!')
     #### 1h: Multi-resolution ####
     # Using the same model as the one in sect-1g, we extract features at 4
     # different resolutions and average the outputs
