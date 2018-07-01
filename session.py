@@ -162,7 +162,7 @@ elif args.sect == '1c':
     print(dfeats.shape)
     input("Check session.py. Press Enter to continue...")
     # Q: Why does the size of the feature representation changes? Why does the size of the feature representation is important for a image retrieval task?
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
+    dataset.vis_top(dfeats, q_idx, ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1c')
