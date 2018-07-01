@@ -108,7 +108,7 @@ python demo.py --qidx 42 --topk 5
 
 and you should see the following ouput:
 
-![Output](https://www.dropbox.com/s/pgboc4yrehvdsh7/out.png?raw=1)
+![Output Demo](https://www.dropbox.com/s/pgboc4yrehvdsh7/out.png?raw=1)
 
 ## Session
 
@@ -119,17 +119,20 @@ To go through the practical session, we will use the `session.py` script. This s
 - --hide-tsne: This flag desactivate the tsne computation. In some sections you may want to experiment with different queries and not to visualize the TSNE projection again (since this may take between 30 seconds to several minutes depending on your CPU :S)
 
 
-We recommend running it inside iPython using the command `%run`, since this allows you to visualize the variables that were created during the execution (eg. you may want to check a given layer of the network). Here's an example:
+We recommend running the session from iPython using the command `%run`, since this allows you to visualize the variables that were created during the execution (eg. you may want to check a given layer of the network). Here's an example:
 
 ```
-$ ipython
-> %run script.py --sect 1i --qidx 42 --hide-tsne
+source $HOME/miniconda3/bin/activate
+cd $HOME/my_projects/paiss
+ipython
+> %run script.py --sect 1i --hide-tsne --qidx 23
+> qfeats.shape
+> qfeats[q_idx]
 ```
-
-![Output](https://www.dropbox.com/s/m7holr1w7h3eyea/tty.gif?raw=1)
 
 Which will show the following results:
+![Output Terminal](https://www.dropbox.com/s/ak3jekahvojftgs/terminal.png?raw=1)
 
-![Output](https://www.dropbox.com/s/4w96kmtlped6tfo/out2.png?raw=1)
+![Output Session](https://www.dropbox.com/s/njerxf4j8vv5ji1/out2.png?raw=1)
 
 **Note:** If you don't have iPython installed, you can install it using the following conda command: `conda install ipython`
