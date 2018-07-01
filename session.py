@@ -204,10 +204,11 @@ elif args.sect == '1e':
     # We use a PCA learnt on landmarks to whiten the output features of 'resnet18-cls-lm-gem'
     dfeats = np.load(models_dict['resnet18-cls-lm-gem-pcaw']['dataset'])
     qfeats = np.load(models_dict['resnet18-cls-lm-gem-pcaw']['queries'])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1e-1')
         # run t-SNE including unlabeled images
-        do_tsne(dfeats, labels, classes, sec='1e-2', show_unlabeled=True, out_image_file=out_image)
+        do_tsne(dfeats, labels, classes, sec='1e-2', show_unlabeled=True)
         # Q: What can we say about the separation of data when included unlabeled images? And the distribution of the unlabeled features? How can we train a model to separate labeled from unlabeled data?
 
 
@@ -224,7 +225,7 @@ elif args.sect == '1f':
     dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1f-1')
-        do_tsne(dfeats, labels, classes, sec='1f-2', show_unlabeled=True, out_image_file=out_image)
+        do_tsne(dfeats, labels, classes, sec='1f-2', show_unlabeled=True)
         # Q: Compare the plots with unlabeled data of the model trained for retrieval (with triplet loss) and the model trained for classification of the previous subsection. How does it change?
 
 
