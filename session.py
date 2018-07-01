@@ -247,7 +247,7 @@ elif args.sect == '1i':
     dfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['dataset'])
     qfeats = np.load(models_dict['resnet50-rnk-lm-gem-da-mr']['queries'])
     q_idx = args.qidx if args.qidx is not None else 0
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx])
+    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
 
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1i')
