@@ -3,7 +3,7 @@ NLE practical session for [PAISS 2018](https://project.inria.fr/paiss/)
 
 ## Installation
 
-This code requires Python 3 and Pytorch 0.4. Follow the instructions below to install all the necessary dependencies. 
+This code requires Python 3 and Pytorch 0.4. Follow the instructions below to install all the necessary dependencies.
 
 ### Linux / MacOS
 
@@ -103,9 +103,33 @@ Execute:
 ```
 source $HOME/miniconda3/bin/activate
 cd $HOME/my_projects/paiss
-python demo.py --qidx 42 --topk 5 
+python demo.py --qidx 42 --topk 5
 ```
 
 and you should see the following ouput:
 
 ![Output](https://www.dropbox.com/s/pgboc4yrehvdsh7/out.png?raw=1)
+
+## Session
+
+To go through the practical session, we will use the `session.py` script. This scrip contains all the exercises and questions in the comments, and accepts the following arguments:
+
+- --sect [str]: Selects the section of the session to be run. You can select one section between 1a to 1i, and 2a to 2g.
+- --qidx [int]: Selects the query index that you want to use for the section. Each section has already some default indexes, so this argument is not strictly required.
+- --hide-tsne: This flag desactivate the tsne computation. In some sections you may want to experiment with different queries and not to visualize the TSNE projection again (since this may take between 30 seconds to several minutes depending on your CPU :S)
+
+
+We recommend running it inside iPython using the command `%run`, since this allows you to visualize the variables that were created during the execution (eg. you may want to check a given layer of the network). Here's an example:
+
+```
+$ ipython
+> %run script.py --sect 1i --qidx 42 --hide-tsne
+```
+
+![Output](https://www.dropbox.com/s/m7holr1w7h3eyea/tty.gif?raw=1)
+
+Which will show the following results:
+
+![Output](https://www.dropbox.com/s/4w96kmtlped6tfo/out2.png?raw=1)
+
+**Note:** If you don't have iPython installed, you can install it using the following conda command: `conda install ipython`
