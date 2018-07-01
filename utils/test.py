@@ -25,7 +25,7 @@ def extract_query(net, dataset, q_idx, scale=800, crop=True, flip=None, rotate=N
 
     # Forward pass to extract the features
     with torch.no_grad():
-        print ('Extracting the representation of the query...')
+        print ('Extracting features using input={} pixels...'.format(scale))
         q_feat = net(I).cpu().numpy()
 
     return q_feat, img
