@@ -65,6 +65,12 @@ if args.sect not in sections:
 
 # Default query indexes for each section
 preselected_queries = {e:0 for e in sections}
+preselected_queries['1a'] = 11
+preselected_queries['1b'] = 11
+preselected_queries['1c'] = 11
+preselected_queries['1d'] = 30
+preselected_queries['1e'] = 30
+preselected_queries['1f'] = 30
 preselected_queries['2a'] = 42
 preselected_queries['2b'] = 42
 preselected_queries['2c'] = 7
@@ -137,7 +143,7 @@ elif args.sect == '1b':
 
     dfeats = np.load(models_dict['alexnet-cls-lm-fc7']['dataset'])
     qfeats = np.load(models_dict['alexnet-cls-lm-fc7']['queries'])
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True, out_image_file=out_image)
+    dataset.vis_top(dfeats, q_idx, ap_flag=True, out_image_file=out_image)
 
     if args.show_tsne:
         # run t-SNE
@@ -204,7 +210,7 @@ elif args.sect == '1e':
     # We use a PCA learnt on landmarks to whiten the output features of 'resnet18-cls-lm-gem'
     dfeats = np.load(models_dict['resnet18-cls-lm-gem-pcaw']['dataset'])
     qfeats = np.load(models_dict['resnet18-cls-lm-gem-pcaw']['queries'])
-    dataset.vis_top(dfeats, q_idx, q_feat=qfeats[q_idx], ap_flag=True)
+    dataset.vis_top(dfeats, q_idx, ap_flag=True)
     if args.show_tsne:
         do_tsne(dfeats, labels, classes, sec='1e-1')
         # run t-SNE including unlabeled images
