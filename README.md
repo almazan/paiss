@@ -136,3 +136,6 @@ Which will show the following results:
 ![Output Session](https://www.dropbox.com/s/njerxf4j8vv5ji1/out2.png?raw=1)
 
 **Note:** If you don't have iPython installed, you can install it using the following conda command: `conda install ipython`
+
+Link to the slides: [PDF 30MB](https://www.dropbox.com/s/mjmh8al5wg6731j/18_07_PAISS_practical_session.pdf?dl=0)
+
