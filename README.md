@@ -138,5 +138,7 @@ Which will show the following results:
 
 **Note:** If you don't have iPython installed, you can install it using the following conda command: `conda install ipython`
 
+**Note:** The code is automatically saving the plots generated in the folder `results/`
+
 **Link to the slides**: [PDF 30MB](https://www.dropbox.com/s/mjmh8al5wg6731j/18_07_PAISS_practical_session.pdf?dl=0)
 
