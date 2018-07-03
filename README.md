@@ -125,7 +125,7 @@ We recommend running the session from iPython using the command `%run`, since th
 source $HOME/miniconda3/bin/activate
 cd $HOME/my_projects/paiss
 ipython
-> %run script.py --sect 1i --hide-tsne --qidx 23
+> %run session.py --sect 1i --hide-tsne --qidx 23
 > qfeats.shape
 > qfeats[q_idx]
 ```
