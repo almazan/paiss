@@ -50,7 +50,7 @@ def demo(args):
     print ('Done\n')
 
     # Rank the database and visualize the top-k most similar images in the database
-    dataset.vis_top(d_feats, args.qidx, q_feat=q_feat, topk=args.topk, out_image_file='out.png')
+    dataset.vis_top(d_feats, args.qidx, q_feat=q_feat, topk=args.topk, out_image_file='results/out.png')
 
 
 if __name__ == '__main__':
